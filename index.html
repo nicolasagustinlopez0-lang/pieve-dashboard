@@ -274,7 +274,8 @@ tr.row-alert td{background:#FCE8E6;}
   .section{padding:32px 48px;max-width:1500px;margin:0 auto;}
   .home-hero{margin:-32px -48px 24px;padding:56px 48px 48px;}
   #sec-home .home-grid{margin-top:0;max-width:900px;}
-  .sc-grid{grid-template-columns:repeat(3,1fr);}
+ .sc-grid-3{grid-template-columns:repeat(3,1fr);}
+.sc-grid-4{grid-template-columns:repeat(4,1fr);}
   .chart-wrap{height:320px;}
   .chart-wrap-sm{height:260px;}
   .donut-wrap-sm{width:160px;height:160px;}
@@ -383,7 +384,7 @@ tr.row-alert td{background:#FCE8E6;}
   <div class="date-filter-bar"><label>Data (seleziona una o più)</label><div class="date-multiselect" id="prod-date-ms"></div></div>
   <div class="filter-row" id="prod-grp-filters"></div>
   <p class="sec-lbl">Riepilogo Produzione Latte</p>
-  <div class="sc-grid" id="prod-scorecards"></div>
+  <div class="sc-grid sc-grid-3" id="prod-scorecards"></div>
   <div class="card chart-card"><div class="card-title">Totale Latte Aziendale (L) · Ultimi 15 giorni</div><div class="chart-wrap"><canvas id="chartTotaleLatte"></canvas></div></div>
   <p class="sec-lbl">Dettaglio per Gruppo</p>
   <div class="card"><div class="tbl-wrap tbl-scroll"><table><thead><tr><th>Gruppo</th><th>Tipo</th><th>Animali</th><th>Gg Latt</th><th>Media Latt</th></tr></thead><tbody id="prod-table"></tbody></table></div></div>
@@ -401,7 +402,7 @@ tr.row-alert td{background:#FCE8E6;}
   <div class="date-filter-bar"><label>Data (seleziona una o più)</label><div class="date-multiselect" id="san-date-ms"></div></div>
   <div class="filter-row" id="san-grp-filters"></div>
   <p class="sec-lbl">Riepilogo Ingestione</p>
-  <div class="sc-grid" id="san-scorecards"></div>
+  <div class="sc-grid sc-grid-4" id="san-scorecards"></div>
   <div class="card chart-card">
     <div class="card-title-row">
       <div class="card-title" id="chartSS-title">Ingestione Sostanza Secca per Capo · Ultimi 15 giorni</div>
@@ -875,4 +876,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1783053083066 -->
+<!-- deploy:1783053324229 -->
