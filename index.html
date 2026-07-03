@@ -394,7 +394,7 @@ tr.row-alert td{background:#FCE8E6;}
   <div class="sc-grid sc-grid-3" id="prod-scorecards"></div>
   <div class="card chart-card"><div class="card-title">Totale Latte Aziendale (L) · Ultimi 15 giorni</div><div class="chart-wrap"><canvas id="chartTotaleLatte"></canvas></div></div>
   <p class="sec-lbl">Dettaglio per Gruppo</p>
-  <div class="card"><div class="tbl-wrap tbl-scroll"><table><thead><tr><th>Gruppo</th><th>Tipo</th><th>Animali</th><th>Gg Latt</th><th>Media Latt</th></tr></thead><tbody id="prod-table"></tbody></table></div></div>
+  <div class="card"><div class="tbl-wrap tbl-scroll"><table><thead id="prod-table-head"><tr><th>Gruppo</th><th>Tipo</th><th>Animali</th><th>Gg Latt</th><th>Media Latt</th><th id="col-dev">Dev. Attesa</th><th id="col-medse">Media Sett.</th><th id="col-oggi">Latte Oggi</th><th id="col-ieri">Latte Ieri</th><th id="col-ldev">MdLDEV</th></tr></thead><tbody id="prod-table"></tbody></table></div></div>
   <div class="card chart-card"><div class="card-title">Andamento Produzione Latte nel Tempo</div><div class="chart-wrap"><canvas id="chartLatteAndamento"></canvas></div></div>
   <div class="card chart-card"><div class="card-title">Produzione Latte per Gruppo</div><div class="chart-wrap"><canvas id="chartLatteGruppo"></canvas></div></div>
   <div class="top3-donut-row">
@@ -760,11 +760,11 @@ function renderProduzione() {
   const animaliByDate = dates.map(d => { const dayRows = rows.filter(r => r.Date === d); return dayRows.reduce((s,r) => s + n(r.Numero_Capi), 0); });
   const totalAnim = animaliByDate.length ? animaliByDate.reduce((a,b)=>a+b,0) / animaliByDate.length : 0;
   const rowsLattazione = rows.filter(r => ![28,29,30].includes(+r.CreGR));
-const latteOggiAvg = rowsLattazione.length ? rowsLattazione.reduce((s,r)=>s+n(r.MdLAGIO),0)/rowsLattazione.length : 0;
+  const latteOggiAvg = rowsLattazione.length ? rowsLattazione.reduce((s,r)=>s+n(r.MdLAGIO),0)/rowsLattazione.length : 0;
   const rowsLattazioneConLatte = rowsLattazione.filter(r => n(r.MdLAG01) > 0);
-const avgLAG01 = rowsLattazioneConLatte.length ? rowsLattazioneConLatte.reduce((s,r)=>s+n(r.MdLAG01),0)/rowsLattazioneConLatte.length : 0;
+  const avgLAG01 = rowsLattazioneConLatte.length ? rowsLattazioneConLatte.reduce((s,r)=>s+n(r.MdLAG01),0)/rowsLattazioneConLatte.length : 0;
   const rowsConMedse = rows.filter(r => n(r.MdMEDSE) > 0);
-const avgMEDSE = rowsConMedse.length ? rowsConMedse.reduce((s,r)=>s+n(r.MdMEDSE),0)/rowsConMedse.length : 0;
+  const avgMEDSE = rowsConMedse.length ? rowsConMedse.reduce((s,r)=>s+n(r.MdMEDSE),0)/rowsConMedse.length : 0;
   const deltaL   = avgLAG01 ? ((latteOggiAvg - avgLAG01)/avgLAG01*100) : null;
   const deltaCls = deltaL===null?"":deltaL>=0?"up":"dn";
   const deltaTxt = deltaL===null?"":((deltaL>0?"+":"")+deltaL.toFixed(1)+"%");
@@ -781,21 +781,27 @@ const avgMEDSE = rowsConMedse.length ? rowsConMedse.reduce((s,r)=>s+n(r.MdMEDSE)
     { label:"MdMEDSE", data: last15.map(d=>{ const dr=andamentoRows(d); return dr.length?dr.reduce((s,r)=>s+n(r.MdMEDSE),0)/dr.length:null; }), borderColor:"#FBA94C", backgroundColor:"#FBA94C20", borderWidth:2,pointRadius:3,tension:.3,fill:false }
   ], "kg/capo");
   lineChart("chartTotaleLatte", last15.map(fmtLabel), [{ label:"Totale Latte [L]", data: last15.map(d=>{ const dr=andamentoRows(d); return dr.length?dr.reduce((s,r)=>s+n(r.MdLAGIO)*n(r.Numero_Capi),0):null; }), borderColor:"#0284C7", backgroundColor:"#0284C720", borderWidth:2,pointRadius:3,tension:.3,fill:false }], "Litri");
-  document.getElementById("prod-table").innerHTML = rows.sort((a,b)=>dateSortKey(b.Date).localeCompare(dateSortKey(a.Date))||(+a.CreGR-+b.CreGR)).map(r=>{ return `<tr><td>${r.CreGR}${dates.length>1?` <small style="color:#999">(${r.Date})</small>`:""}</td>${cellTipo(tipoGruppo(r.CreGR))}<td>${N0(r.Numero_Capi)}</td><td>${N0(r.MdGLAT||r["Md GLAT"])}</td><td>${N1(r.MdLATT||r["Md LATT"])}</td></tr>`; }).join("");
+  const prevMap = {};
+  prevRows.forEach(r=>{ prevMap[String(r.CreGR)] = r; });
+  const isNonLatt = ["28","29","30"].includes(activeGrp.prod);
+  ["col-dev","col-medse","col-oggi","col-ieri","col-ldev"].forEach(id => {
+    document.getElementById(id).style.display = isNonLatt ? "none" : "";
+  });
+  document.getElementById("prod-table").innerHTML = rows.sort((a,b)=>dateSortKey(b.Date).localeCompare(dateSortKey(a.Date))||(+a.CreGR-+b.CreGR)).map(r=>{ const pr = prevMap[String(r.CreGR)]; return `<tr><td>${r.CreGR}${dates.length>1?` <small style="color:#999">(${r.Date})</small>`:""}</td>${cellTipo(tipoGruppo(r.CreGR))}<td>${N0(r.Numero_Capi)}</td><td>${N0(r.MdGLAT||r["Md GLAT"])}</td><td>${N1(r.MdLATT||r["Md LATT"])}</td>${isNonLatt ? "" : `<td>${N1(r.MdDEVAT||r["MdDEVAT"])}</td><td>${N1(r.MdMEDSE)}</td><td>${N1(r.MdLAGIO)}</td><td>${pr?N1(pr.MdLAGIO):"—"}</td>${cellLDEV(r.MdLDEV||r["Md LDEV"])}`}</tr>`; }).join("");
   const grpAgg = {};
   rowsWithLatte.forEach(r=>{ const g=r.CreGR; if(!grpAgg[g]) grpAgg[g]=[]; grpAgg[g].push(n(r.MdLAGIO)); });
   const ranked = Object.entries(grpAgg).map(([g,vals])=>(({g, v: vals.reduce((a,b)=>a+b,0)/vals.length}))).sort((a,b)=>b.v-a.v);
   const best3=ranked.slice(0,3); const worst3=[...ranked].reverse().slice(0,3);
   document.getElementById("prod-top3").innerHTML = `
-    <div class="top3-card"><div class="top3-hdr best"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 01-10 0V4z"/><path d="M5 4H3v2a4 4 0 004 4M19 4h2v2a4 4 0 01-4 4"/></svg><span>Top 3 gruppo migliore</span></div><div class="top3-list">${best3.map((r,i)=>{ const w=best3[0].v?Math.max(8,r.v/best3[0].v*100):8; return `<div class="top3-item"><div class="top3-rank best">${i+1}</div><div class="top3-grp">Gr.${r.g}</div><div class="top3-bar-track"><div class="top3-bar-fill best" style="width:${w}%"></div></div><div class="top3-val best">${N1(r.v)} L</div></div>`; }).join("")}</div></div>
-    <div class="top3-card"><div class="top3-hdr worst"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Top 3 gruppo peggiore</span></div><div class="top3-list">${worst3.map((r,i)=>{ const maxW=ranked[0]?ranked[0].v:1; const w=maxW?Math.max(8,r.v/maxW*100):8; return `<div class="top3-item"><div class="top3-rank worst">${i+1}</div><div class="top3-grp">Gr.${r.g}</div><div class="top3-bar-track"><div class="top3-bar-fill worst" style="width:${w}%"></div></div><div class="top3-val worst">${N1(r.v)} L</div></div>`; }).join("")}</div></div>`;
+    <div class="top3-card"><div class="top3-hdr best"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 01-10 0V4z"/><path d="M5 4H3v2a4 4 0 004 4M19 4h2v2a4 4 0 01-4 4"/></svg><span>Top 3 gruppo migliore</span></div><div class="top3-list">${best3.map((r,i)=>{ const w=best3[0].v?Math.max(8,r.v/best3[0].v*100):8; return `<div class="top3-item"><div class="top3-rank best">${i+1}</div><div class="top3-grp">Gr.${r.g}</div><div class="top3-bar-track"><div class="top3-bar-fill best" style="width:${w}%"></div></div><div class="top3-val best">${N1(r.v)} L</div></div>`; }).join("")}}</div></div>
+    <div class="top3-card"><div class="top3-hdr worst"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Top 3 gruppo peggiore</span></div><div class="top3-list">${worst3.map((r,i)=>{ const maxW=ranked[0]?ranked[0].v:1; const w=maxW?Math.max(8,r.v/maxW*100):8; return `<div class="top3-item"><div class="top3-rank worst">${i+1}</div><div class="top3-grp">Gr.${r.g}</div><div class="top3-bar-track"><div class="top3-bar-fill worst" style="width:${w}%"></div></div><div class="top3-val worst">${N1(r.v)} L</div></div>`; }).join("")}}</div></div>`;
   const grpMedseAgg={};
   rowsWithLatte.forEach(r=>{ const g=r.CreGR; if(!grpMedseAgg[g]) grpMedseAgg[g]=[]; grpMedseAgg[g].push(n(r.MdMEDSE)); });
   const medseByGrp={};
   Object.entries(grpMedseAgg).forEach(([g,vals])=>{ medseByGrp[g]=vals.reduce((a,b)=>a+b,0)/vals.length; });
   barChart("chartLatteGruppo", ranked.map(r=>"Gr."+r.g), [
     { label:"MdLAGIO", data:ranked.map(r=>r.v), backgroundColor:"#0284C7", borderRadius:3, yAxisID:"y" },
-    { label:"MdMEDSE",  data:ranked.map(r=>medseByGrp[r.g]||0), backgroundColor:"#FBA94C", borderRadius:3, yAxisID:"y1" }
+    { label:"MdMEDSE", data:ranked.map(r=>medseByGrp[r.g]||0), backgroundColor:"#FBA94C", borderRadius:3, yAxisID:"y1" }
   ], true);
   const tipi={};
   rows.filter(r=>n(r.Numero_Capi)>0).forEach(r=>{ const t=tipoGruppo(r.CreGR); tipi[t]=(tipi[t]||0)+n(r.Numero_Capi); });
@@ -883,4 +889,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1783087104232 -->
+<!-- deploy:1783087738126 -->
