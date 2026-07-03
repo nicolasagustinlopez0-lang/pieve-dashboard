@@ -751,8 +751,9 @@ function renderProduzione() {
   const rowsWithLatte = rows.filter(r=>n(r.MdLAGIO)>0);
   const animaliByDate = dates.map(d => { const dayRows = rows.filter(r => r.Date === d); return dayRows.reduce((s,r) => s + n(r.Numero_Capi), 0); });
   const totalAnim = animaliByDate.length ? animaliByDate.reduce((a,b)=>a+b,0) / animaliByDate.length : 0;
-  const latteOggiAvg = rows.length ? rows.reduce((s,r)=>s+n(r.MdLAGIO),0)/rows.length : 0;
-  const avgLAG01  = rows.length ? rows.reduce((s,r)=>s+n(r.MdLAG01),0)/rows.length : 0;
+  const rowsLattazione = rows.filter(r => ![28,29,30].includes(+r.CreGR));
+const latteOggiAvg = rowsLattazione.length ? rowsLattazione.reduce((s,r)=>s+n(r.MdLAGIO),0)/rowsLattazione.length : 0;
+  const avgLAG01 = rowsLattazione.length ? rowsLattazione.reduce((s,r)=>s+n(r.MdLAG01),0)/rowsLattazione.length : 0;
   const avgMEDSE  = rows.length ? rows.reduce((s,r)=>s+n(r.MdMEDSE),0)/rows.length : 0;
   const deltaL   = avgLAG01 ? ((latteOggiAvg - avgLAG01)/avgLAG01*100) : null;
   const deltaCls = deltaL===null?"":deltaL>=0?"up":"dn";
@@ -873,4 +874,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1783051268449 -->
+<!-- deploy:1783051517846 -->
