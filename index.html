@@ -392,9 +392,14 @@ tr.row-alert td{background:#FCE8E6;}
   <div class="filter-row" id="prod-grp-filters"></div>
   <p class="sec-lbl">Riepilogo Produzione Latte</p>
   <div class="sc-grid sc-grid-3" id="prod-scorecards"></div>
-  <div class="card chart-card"><div class="card-title">Totale Latte Aziendale (L) · Ultimi 15 giorni</div><div class="chart-wrap"><canvas id="chartTotaleLatte"></canvas></div></div>
+  <div class="card chart-card"><div class="card-title" id="chartTotaleLatte-title">Totale Latte Aziendale (L) · Ultimi 15 giorni</div><div class="chart-wrap"><canvas id="chartTotaleLatte"></canvas></div></div>
   <p class="sec-lbl">Dettaglio per Gruppo</p>
-  <div class="card"><div class="tbl-wrap tbl-scroll"><table><thead id="prod-table-head"><tr><th>Gruppo</th><th>Tipo</th><th>Animali</th><th>Gg Latt</th><th>Media Latt</th><th id="col-medse">Media Sett.</th><th id="col-oggi">Latte Oggi</th><th id="col-ieri">Latte Ieri</th><th id="col-3d">Media 3gg</th><th id="col-ldev">MdLDEV</th></tr></thead><tbody id="prod-table"></tbody></table></div></div>
+  <div class="card"><div class="tbl-wrap tbl-scroll"><table><thead id="prod-table-head"><tr><th>Gruppo</th><th>Tipo</th><th>Animali</th><th>Gg Latt</th><th>Media Latt</th><th id="col-medse">Media Sett.</th><th id="col-oggi">Latte Oggi</th><th id="col-ieri">Latte Ieri</th><th id="col-3d">Media 3gg</th><th id="col-ldev">MdLDEV</th></tr></thead><tbody id="prod-table"></tbody></table>
+<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--grey-line);font-size:11px;color:var(--grey-text);line-height:1.7;">
+  <b style="color:var(--black2)">Media 3gg</b> — media di Latte Oggi degli ultimi 3 giorni per gruppo.<br>
+  <b style="color:var(--black2)">MdLDEV</b> — variazione % tra Latte Oggi e la Media 3gg. <span style="color:#16A34A;font-weight:600">Verde</span> = sopra la media, <span style="color:#DC2626;font-weight:600">Rosso</span> = sotto la media.
+</div>
+</div></div>
   <div class="card chart-card"><div class="card-title">Andamento Produzione Latte nel Tempo</div><div class="chart-wrap"><canvas id="chartLatteAndamento"></canvas></div></div>
   <div class="card chart-card"><div class="card-title">Produzione Latte per Gruppo</div><div class="chart-wrap"><canvas id="chartLatteGruppo"></canvas></div></div>
   <div class="top3-donut-row">
@@ -782,6 +787,8 @@ function renderProduzione() {
     { label:"MdLAGIO", data: last15.map(d=>{ const dr=andamentoRows(d); return dr.length?dr.reduce((s,r)=>s+n(r.MdLAGIO),0)/dr.length:null; }), borderColor:"#0284C7", backgroundColor:"#0284C720", borderWidth:2,pointRadius:3,tension:.3,fill:false },
     { label:"MdMEDSE", data: last15.map(d=>{ const dr=andamentoRows(d); return dr.length?dr.reduce((s,r)=>s+n(r.MdMEDSE),0)/dr.length:null; }), borderColor:"#FBA94C", backgroundColor:"#FBA94C20", borderWidth:2,pointRadius:3,tension:.3,fill:false }
   ], "kg/capo");
+  const titleSuffix = dates.length === allDates.length ? "tutti i dati" : `ultimi 15 giorni fino al ${latestSelected}`;
+document.getElementById("chartTotaleLatte-title").textContent = `Totale Latte Aziendale (L) · ${titleSuffix}`;
   lineChart("chartTotaleLatte", last15.map(fmtLabel), [{ label:"Totale Latte [L]", data: last15.map(d=>{ const dr=andamentoRows(d); return dr.length?dr.reduce((s,r)=>s+n(r.MdLAGIO)*n(r.Numero_Capi),0):null; }), borderColor:"#0284C7", backgroundColor:"#0284C720", borderWidth:2,pointRadius:3,tension:.3,fill:false }], "Litri");
   const prevMap = {};
   prevRows.forEach(r=>{ prevMap[String(r.CreGR)] = r; });
@@ -898,4 +905,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1783375430738 -->
+<!-- deploy:1783375869931 -->
