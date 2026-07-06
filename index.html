@@ -796,7 +796,7 @@ Object.keys(Object.fromEntries([...new Set(DATA_ANIMALI.map(r=>r.CreGR))].map(g=
   const gRows = DATA_ANIMALI.filter(r=>String(r.CreGR)===String(g) && gDates.includes(r.Date) && n(r.MdLAGIO)>0);
   avg3Map[g] = gRows.length ? gRows.reduce((s,r)=>s+n(r.MdLAGIO),0)/gRows.length : null;
 });
-document.getElementById("prod-table").innerHTML = rows.sort((a,b)=>dateSortKey(b.Date).localeCompare(dateSortKey(a.Date))||(+a.CreGR-+b.CreGR)).map(r=>{ const pr = prevMap[String(r.CreGR)]; return `<tr><td>${r.CreGR}${dates.length>1?` <small style="color:#999">(${r.Date})</small>`:""}</td>${cellTipo(tipoGruppo(r.CreGR))}<td>${N0(r.Numero_Capi)}</td><td>${N0(r.MdGLAT||r["Md GLAT"])}</td><td>${N1(r.MdLATT||r["Md LATT"])}</td>${isNonLatt ? "" : `<td>${N1(r.MdMEDSE)}</td><td>${N1(r.MdLAGIO)}</td><td>${N1(r.MdLAG01)}</td><td>${avg3Map[r.CreGR]?N1(avg3Map[r.CreGR]):"—"}</td><td>${avg3Map[r.CreGR]?PCT((n(r.MdLAGIO)-avg3Map[r.CreGR])/avg3Map[r.CreGR]*100):"—"}</td>`}</tr>`; }).join("");
+document.getElementById("prod-table").innerHTML = rows.sort((a,b)=>dateSortKey(b.Date).localeCompare(dateSortKey(a.Date))||(+a.CreGR-+b.CreGR)).map(r=>{ const pr = prevMap[String(r.CreGR)]; return `<tr><td>${r.CreGR}${dates.length>1?` <small style="color:#999">(${r.Date})</small>`:""}</td>${cellTipo(tipoGruppo(r.CreGR))}<td>${N0(r.Numero_Capi)}</td><td>${N0(r.MdGLAT||r["Md GLAT"])}</td><td>${N1(r.MdLATT||r["Md LATT"])}</td>${isNonLatt ? "" : `<td>${N1(r.MdMEDSE)}</td><td>${N1(r.MdLAGIO)}</td><td>${N1(r.MdLAG01)}</td><td>${avg3Map[r.CreGR]?N1(avg3Map[r.CreGR]):"—"}</td><td>${(()=>{ if(!avg3Map[r.CreGR]) return "—"; const pct=(n(r.MdLAGIO)-avg3Map[r.CreGR])/avg3Map[r.CreGR]*100; const col=pct>0?"#16A34A":pct<0?"#DC2626":"#64748B"; return `<span style="color:${col};font-weight:700">${PCT(pct)}</span>`; })()}</td>`}</tr>`; }).join("");
   const grpAgg = {};
   rowsWithLatte.forEach(r=>{ const g=r.CreGR; if(!grpAgg[g]) grpAgg[g]=[]; grpAgg[g].push(n(r.MdLAGIO)); });
   const ranked = Object.entries(grpAgg).map(([g,vals])=>(({g, v: vals.reduce((a,b)=>a+b,0)/vals.length}))).sort((a,b)=>b.v-a.v);
@@ -898,4 +898,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1783375269282 -->
+<!-- deploy:1783375430738 -->
