@@ -789,7 +789,7 @@ function renderProduzione() {
   ["col-dev","col-medse","col-oggi","col-ieri","col-ldev"].forEach(id => {
     const el = document.getElementById(id); if (el) el.style.display = isNonLatt ? "none" : "";
   });
-  document.getElementById("prod-table").innerHTML =
+  
   const avg3Map = {};
 Object.keys(Object.fromEntries([...new Set(DATA_ANIMALI.map(r=>r.CreGR))].map(g=>[g,null]))).forEach(g => {
   const gDates = allDates.slice(dateIdx, dateIdx+3);
@@ -898,4 +898,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1783374127860 -->
+<!-- deploy:1783374449240 -->
