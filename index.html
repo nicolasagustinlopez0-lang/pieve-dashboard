@@ -780,9 +780,8 @@ function renderProduzione() {
     <div class="sc"><div class="sc-lbl"># Animali Attivi</div><div class="sc-val">${N0(totalAnim)}</div><div class="sc-sub">${dateLabel}</div></div>
     <div class="sc" style="border-top-color:#0284C7;background:#E0F2FE;"><div class="sc-lbl" style="color:#0284C7">Produzione Latte (kg/capo)</div><div class="sc-val" style="color:#0284C7">${N1(avgLAG01)}<small> L</small></div></div>
     <div class="sc"><div class="sc-lbl">MdMEDSE medio</div><div class="sc-val">${N1(avgMEDSE)}<small> L</small></div><div class="sc-sub">Media settimanale</div></div>`;
-  const last15 = dates.length === allDatesCache.prod.length 
-  ? allDates.slice(dateIdx, dateIdx+15).reverse()
-  : allDates.slice(dateIdx, dateIdx+15).reverse();
+  const isAllDates = dates.length === allDatesCache.prod.length;
+const last15 = isAllDates ? [...allDates].reverse() : allDates.slice(dateIdx, dateIdx+15).reverse();
   const grpFilterAndamento = activeGrp.prod==="ALL" ? null : activeGrp.prod;
   const andamentoRows = (d) => DATA_ANIMALI.filter(r=>r.Date===d && (grpFilterAndamento===null || String(r.CreGR)===grpFilterAndamento));
   lineChart("chartLatteAndamento", last15.map(fmtLabel), [
@@ -911,4 +910,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1783712086569 -->
+<!-- deploy:1783713771094 -->
