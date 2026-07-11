@@ -807,7 +807,24 @@ Object.keys(Object.fromEntries([...new Set(DATA_ANIMALI.map(r=>r.CreGR))].map(g=
 const dKeysSorted = dates.map(d=>dateSortKey(d)).sort();
 const dDesde = dates.find(d=>dateSortKey(d)===dKeysSorted[0]);
 const dHasta = dates.find(d=>dateSortKey(d)===dKeysSorted[dKeysSorted.length-1]);
-document.getElementById("prod-summary").innerHTML = `Periodo selezionato: <b>${dDesde}${dDesde!==dHasta?` – ${dHasta}`:""}</b> · ${dKeysSorted.length} ${dKeysSorted.length===1?"giorno":"giorni"} · ${new Set(rows.map(r=>String(r.CreGR))).size} gruppi`;
+const grpList = activeGrp.prod === "ALL"
+  ? [...new Set(rows.map(r=>String(r.CreGR)))].sort((a,b)=>+a-+b).map(g=>"Gr."+g).join(", ")
+  : "Gr." + activeGrp.prod;
+const tipiList = [...new Set(rows.map(r=>tipoGruppo(r.CreGR)))].join(", ");
+const avgAnimali = rows.length ? Math.round(rows.reduce((s,r)=>s+n(r.Numero_Capi),0)/rows.length) : 0;
+const rowsConGgLatt = rows.filter(r=>n(r.MdGLAT)>0);
+const avgGgLatt = rowsConGgLatt.length ? Math.round(rowsConGgLatt.reduce((s,r)=>s+n(r.MdGLAT),0)/rowsConGgLatt.length) : 0;
+const rowsConMediaLatt = rows.filter(r=>n(r.MdLATT)>0);
+const avgMediaLatt = rowsConMediaLatt.length ? rowsConMediaLatt.reduce((s,r)=>s+n(r.MdLATT),0)/rowsConMediaLatt.length : 0;
+document.getElementById("prod-summary").innerHTML = `
+  <span><b>Gruppi:</b> ${grpList}</span> &nbsp;·&nbsp;
+  <span><b>Data:</b> ${dDesde}${dDesde!==dHasta?" – "+dHasta:""}</span> &nbsp;·&nbsp;
+  <span><b>Tipo:</b> ${tipiList}</span> &nbsp;·&nbsp;
+  <span><b>Animali:</b> ${N0(avgAnimali)} avg</span> &nbsp;·&nbsp;
+  <span><b>Gg Latt:</b> ${N0(avgGgLatt)} avg</span> &nbsp;·&nbsp;
+  <span><b>Media Latt:</b> ${N1(avgMediaLatt)}</span> &nbsp;·&nbsp;
+  <span><b>Latte Oggi:</b> ${N1(avgLAG01)} L</span>
+`;
 document.getElementById("prod-table").innerHTML = rows.sort((a,b)=>dateSortKey(b.Date).localeCompare(dateSortKey(a.Date))||(+a.CreGR-+b.CreGR)).map(r=>{ const pr = prevMap[String(r.CreGR)]; return `<tr><td>${r.CreGR}</td><td style="white-space:nowrap">${r.Date}</td>${cellTipo(tipoGruppo(r.CreGR))}<td>${N0(r.Numero_Capi)}</td><td>${N0(r.MdGLAT||r["Md GLAT"])}</td><td>${N1(r.MdLATT||r["Md LATT"])}</td>${isNonLatt ? "" : `<td>${n(r.MdLAG01)>0?N1(r.MdLAG01):"—"}</td><td>${avg3Map[r.CreGR]?N1(avg3Map[r.CreGR]):"—"}</td><td>${(()=>{ if(!avg3Map[r.CreGR]) return "—"; const pct=(n(r.MdLAG01)-avg3Map[r.CreGR])/avg3Map[r.CreGR]*100; const col=pct>0?"#16A34A":pct<0?"#DC2626":"#64748B"; return `<span style="color:${col};font-weight:700">${PCT(pct)}</span>`; })()}</td>`}</tr>`; }).join("");
   const grpAgg = {};
   rowsWithLatte.forEach(r=>{ const g=r.CreGR; if(!grpAgg[g]) grpAgg[g]=[]; grpAgg[g].push(n(r.MdLAG01)); });
@@ -910,4 +927,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1783734348953 -->
+<!-- deploy:1783734506296 -->
