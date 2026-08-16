@@ -313,11 +313,10 @@ tr.row-alert td{background:#FCE8E6;}
     <button class="sidebar-nav-btn" id="snav-sanita" onclick="goTo('sanita')">
       <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       <span>Sanità ed Efficienza</span>
-        
-<button class="sidebar-nav-btn" id="snav-silos" onclick="goTo('silos')">
-  <svg viewBox="0 0 24 24"><path d="M6 21V9a6 6 0 0112 0v12"/><line x1="6" y1="13" x2="18" y2="13"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
-  <span>Monitoraggio Silos</span>
-</button>
+    </button>
+    <button class="sidebar-nav-btn" id="snav-silos" onclick="goTo('silos')">
+      <svg viewBox="0 0 24 24"><path d="M6 21V9a6 6 0 0112 0v12"/><line x1="6" y1="13" x2="18" y2="13"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+      <span>Monitoraggio Silos</span>
     </button>
     <button class="sidebar-nav-btn disabled" disabled>
       <svg viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="2"/><path d="M9 8V5a3 3 0 016 0v3M9 13h.01M15 13h.01"/></svg>
@@ -370,16 +369,14 @@ tr.row-alert td{background:#FCE8E6;}
       <div class="home-card-sub">Latte · Animali</div>
     </div>
     <div class="home-card" onclick="goTo('sanita')">
- 
-<div class="home-card" onclick="goTo('silos')">
-  <div class="home-card-icon"><svg viewBox="0 0 24 24"><path d="M6 21V9a6 6 0 0112 0v12"/><line x1="6" y1="13" x2="18" y2="13"/><line x1="4" y1="21" x2="20" y2="21"/></svg></div>
-  <div class="home-card-title">Monitoraggio Silos</div>
-  <div class="home-card-sub">Stock · Autonomia · Alert</div>
-</div>
-</button>
       <div class="home-card-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8 6 5 10.5 5 14a7 7 0 0014 0c0-3.5-3-8-7-12z"/></svg></div>
       <div class="home-card-title">Sanità ed Efficienza</div>
       <div class="home-card-sub">Ingestione SS/TQ · Variazione %</div>
+    </div>
+    <div class="home-card" onclick="goTo('silos')">
+      <div class="home-card-icon"><svg viewBox="0 0 24 24"><path d="M6 21V9a6 6 0 0112 0v12"/><line x1="6" y1="13" x2="18" y2="13"/><line x1="4" y1="21" x2="20" y2="21"/></svg></div>
+      <div class="home-card-title">Monitoraggio Silos</div>
+      <div class="home-card-sub">Stock · Autonomia · Alert</div>
     </div>
     <div class="home-card disabled">
       <div class="home-card-icon"><svg viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="2"/><path d="M9 8V5a3 3 0 016 0v3M9 13h.01M15 13h.01"/></svg></div>
@@ -1097,4 +1094,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1786923299648 -->
+<!-- deploy:1786923437954 -->
