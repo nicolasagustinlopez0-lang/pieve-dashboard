@@ -991,9 +991,6 @@ function renderSanita() {
   document.getElementById("var-bars-content").innerHTML=varSorted.map(r=>{ const v=n(r.Var_SS_pct); const w=Math.min(Math.abs(v)/maxAbsVar*100,100); const col=v>5?"#16A34A":v<-5?"#DC2626":v<-2?"#D97706":"#64748B"; return `<div class="var-bar-row"><div class="var-bar-lbl">Gr.${r.CreGR}</div><div class="var-bar-track"><div class="var-bar-fill" style="width:${w}%;background:${col}"></div></div><div class="var-bar-pct" style="color:${col}">${PCT(v)}</div></div>`; }).join("");
 }
 
-principal, después de
-     renderSanita() y antes de las dos líneas finales de hdr-date. -->
-<script>
 // ══ SILOS ═════════════════════════════════════════════════════════════
 let activeSilo = "ALL";
 let SILOS_LIST = [];
@@ -1094,4 +1091,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1786923437954 -->
+<!-- deploy:1786923827173 -->
