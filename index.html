@@ -1,4 +1,4 @@
-<!DOCTYPE html>taJs
+<!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -313,6 +313,11 @@ tr.row-alert td{background:#FCE8E6;}
     <button class="sidebar-nav-btn" id="snav-sanita" onclick="goTo('sanita')">
       <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       <span>Sanità ed Efficienza</span>
+        
+<button class="sidebar-nav-btn" id="snav-silos" onclick="goTo('silos')">
+  <svg viewBox="0 0 24 24"><path d="M6 21V9a6 6 0 0112 0v12"/><line x1="6" y1="13" x2="18" y2="13"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+  <span>Monitoraggio Silos</span>
+</button>
     </button>
     <button class="sidebar-nav-btn disabled" disabled>
       <svg viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="2"/><path d="M9 8V5a3 3 0 016 0v3M9 13h.01M15 13h.01"/></svg>
@@ -365,6 +370,13 @@ tr.row-alert td{background:#FCE8E6;}
       <div class="home-card-sub">Latte · Animali</div>
     </div>
     <div class="home-card" onclick="goTo('sanita')">
+ 
+<div class="home-card" onclick="goTo('silos')">
+  <div class="home-card-icon"><svg viewBox="0 0 24 24"><path d="M6 21V9a6 6 0 0112 0v12"/><line x1="6" y1="13" x2="18" y2="13"/><line x1="4" y1="21" x2="20" y2="21"/></svg></div>
+  <div class="home-card-title">Monitoraggio Silos</div>
+  <div class="home-card-sub">Stock · Autonomia · Alert</div>
+</div>
+</button>
       <div class="home-card-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8 6 5 10.5 5 14a7 7 0 0014 0c0-3.5-3-8-7-12z"/></svg></div>
       <div class="home-card-title">Sanità ed Efficienza</div>
       <div class="home-card-sub">Ingestione SS/TQ · Variazione %</div>
@@ -453,6 +465,38 @@ tr.row-alert td{background:#FCE8E6;}
   </div>
 </div>
 
+
+<div class="section" id="sec-silos">
+  <div class="date-filter-bar"><label>Data (seleziona una o più)</label><div class="date-multiselect" id="silos-date-ms"></div></div>
+  <div class="filter-row" id="silos-filters"></div>
+  <p class="sec-lbl">Riepilogo Silos</p>
+  <div class="sc-grid sc-grid-4" id="silos-scorecards"></div>
+  <p class="sec-lbl">Stato Silos</p>
+  <div class="card"><div class="tbl-wrap tbl-scroll"><table>
+    <thead><tr><th>Silo</th><th>Data</th><th>Stalla</th><th>Contenuto</th><th>Dest.</th><th>Stock (qt)</th><th>Riemp. %</th><th>Distribuito (kg)</th><th>Δ% g/g</th><th>Media 3gg (kg)</th><th>Autonomia (gg)</th></tr></thead>
+    <tbody id="silos-table"></tbody></table>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--grey-line);font-size:11px;color:var(--grey-text);line-height:1.7;">
+      <b style="color:var(--black2)">Autonomia</b> — giorni residui = stock (qt) ÷ consumo medio degli ultimi 3 giorni. <span style="color:#DC2626;font-weight:600">Rosso</span> sotto 3 gg, <span style="color:#D97706;font-weight:600">ambra</span> sotto 5 gg.<br>
+      <b style="color:var(--black2)">Δ% g/g</b> — variazione del Distribuito rispetto al giorno precedente. Alert quando supera ±10%.
+    </div>
+  </div></div>
+  <div class="card chart-card"><div class="card-title" id="chartSilosStock-title">Evolutivo Stock (qt) · Ultimi 15 giorni</div><div class="chart-wrap"><canvas id="chartSilosStock"></canvas></div></div>
+  <div class="card chart-card"><div class="card-title" id="chartSilosDist-title">Evolutivo Distribuito (kg) · Ultimi 15 giorni</div><div class="chart-wrap"><canvas id="chartSilosDist"></canvas></div></div>
+  <p class="sec-lbl">Autonomia per Silo · Semaforo</p>
+  <div class="card"><div class="card-title" id="silos-auto-title">Giorni residui per silo</div><div id="silos-autonomia-bars"></div></div>
+  <div class="card glossary-card">
+    <div class="card-title">Note e Definizioni</div>
+    <dl class="glossary-list">
+      <dd data-term="Stock (qt)">STATO IMPIANTO: quintali attualmente presenti nel silo. 180 qt = silo pieno.</dd>
+      <dd data-term="Riempimento %">Stock ÷ 180 qt. Indica quanto è pieno il silo.</dd>
+      <dd data-term="Distribuito">Kg di prodotto distribuiti durante l'intera giornata.</dd>
+      <dd data-term="Media 3gg">Media del Distribuito delle ultime 3 letture valide. Base del calcolo dell'autonomia.</dd>
+      <dd data-term="Autonomia (gg)">Giorni stimati prima che il silo si svuoti al ritmo di consumo attuale. Alert sotto i 3 giorni.</dd>
+      <dd data-term="n/d">Dato non disponibile: lettura mancante, valore zero o negativo (anomalia del sensore).</dd>
+    </dl>
+  </div>
+</div>
+
 <button type="button" class="float-jump-btn" id="san-jump-btn" onclick="sanJumpToggle()">
   <svg viewBox="0 0 24 24" id="san-jump-icon"><polyline points="6 9 12 15 18 9"/></svg>
   <span id="san-jump-label">Vai alla tabella</span>
@@ -471,6 +515,11 @@ tr.row-alert td{background:#FCE8E6;}
     <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     Sanità
   </button>
+  
+<button class="nav-btn" id="nav-silos" onclick="goTo('silos')">
+  <svg viewBox="0 0 24 24"><path d="M6 21V9a6 6 0 0112 0v12"/><line x1="6" y1="13" x2="18" y2="13"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+  Silos
+</button>
 </nav>
 
 </div>
@@ -635,7 +684,7 @@ function fmtLabel(d) {
   return p.length===3 ? `${p[0]}/${p[1]}` : d;
 }
 
-const PAGES = ["home","produzione","sanita"];
+const PAGES = ["home","produzione","sanita","silos"];
 function goTo(page) {
   PAGES.forEach(p => {
     document.getElementById("sec-"+p).classList.toggle("active", p===page);
@@ -645,6 +694,7 @@ function goTo(page) {
   });
   if (page==="produzione") renderProduzione();
   if (page==="sanita")     renderSanita();
+  if (page==="silos")      renderSilos();
   window.scrollTo(0,0);
   const jumpBtn = document.getElementById("san-jump-btn");
   jumpBtn.classList.toggle("visible", page==="sanita");
@@ -686,8 +736,8 @@ document.addEventListener("scroll", (e) => {
   }
 }, { passive:true, capture:true });
 
-const selectedDates = { prod:null, san:null };
-const allDatesCache  = { prod:null, san:null };
+const selectedDates = { prod:null, san:null, silos:null };
+const allDatesCache  = { prod:null, san:null, silos:null };
 
 function initDateMultiselect(containerId, key, dataset, renderFn) {
   if (allDatesCache[key]) return;
@@ -944,9 +994,107 @@ function renderSanita() {
   document.getElementById("var-bars-content").innerHTML=varSorted.map(r=>{ const v=n(r.Var_SS_pct); const w=Math.min(Math.abs(v)/maxAbsVar*100,100); const col=v>5?"#16A34A":v<-5?"#DC2626":v<-2?"#D97706":"#64748B"; return `<div class="var-bar-row"><div class="var-bar-lbl">Gr.${r.CreGR}</div><div class="var-bar-track"><div class="var-bar-fill" style="width:${w}%;background:${col}"></div></div><div class="var-bar-pct" style="color:${col}">${PCT(v)}</div></div>`; }).join("");
 }
 
+principal, después de
+     renderSanita() y antes de las dos líneas finales de hdr-date. -->
+<script>
+// ══ SILOS ═════════════════════════════════════════════════════════════
+let activeSilo = "ALL";
+let SILOS_LIST = [];
+
+function buildSiloFilter() {
+  if (!SILOS_LIST.length) SILOS_LIST = [...new Set(DATA_SILOS.map(r=>r.Silo))];
+  const bar = document.getElementById("silos-filters");
+  bar.innerHTML = ["ALL",...SILOS_LIST].map(s =>
+    `<button class="fchip${activeSilo===s?" active":""}" onclick="setSilo('${s}')">${s==="ALL"?"Tutti":s}</button>`
+  ).join("");
+}
+function setSilo(s){ activeSilo = s; buildSiloFilter(); renderSilos(); }
+
+function pillDelta(v){
+  if (v===null||v===undefined||v===""||isNaN(+v)) return `<span class="pill pill-fl">n/d</span>`;
+  const x = +v;
+  if (x >  10) return `<span class="pill pill-am">${PCT(x)}</span>`;
+  if (x < -10) return `<span class="pill pill-dn">${PCT(x)}</span>`;
+  return `<span class="pill pill-fl">${PCT(x)}</span>`;
+}
+function cellAutonomia(v){
+  if (v===null||v===undefined||isNaN(+v)) return `<td>n/d</td>`;
+  const x = +v;
+  if (x < 3) return `<td style="color:#DC2626;font-weight:800">${N1(x)}</td>`;
+  if (x < 5) return `<td style="color:#D97706;font-weight:700">${N1(x)}</td>`;
+  return `<td style="font-weight:600">${N1(x)}</td>`;
+}
+
+function renderSilos() {
+  initDateMultiselect("silos-date-ms", "silos", DATA_SILOS, "renderSilos");
+  buildSiloFilter();
+  const dates = selectedDates.silos;
+  const allDates = allDatesCache.silos;
+  const latestSelected = dates.slice().sort((a,b)=>dateSortKey(b).localeCompare(dateSortKey(a)))[0];
+  const dateIdx = allDates.indexOf(latestSelected);
+
+  const rows = DATA_SILOS.filter(r => dates.includes(r.Date) && (activeSilo==="ALL"||r.Silo===activeSilo));
+  const snap = DATA_SILOS.filter(r => r.Date===latestSelected && (activeSilo==="ALL"||r.Silo===activeSilo));
+
+  // ── Scorecards
+  const autoVals = snap.map(r=>r.Autonomia_gg).filter(v=>v!==null&&!isNaN(+v)).map(Number);
+  const avgAuto = autoVals.length ? autoVals.reduce((a,b)=>a+b,0)/autoVals.length : null;
+  const nAlertAuto = snap.filter(r=>r.Alert_Autonomia).length;
+  const nAlertDist = snap.filter(r=>r.Alert_Distribuito).length;
+  document.getElementById("silos-scorecards").innerHTML = `
+    <div class="sc"><div class="sc-lbl">Silos monitorati</div><div class="sc-val">${snap.length}</div><div class="sc-sub">${latestSelected}</div></div>
+    <div class="sc"><div class="sc-lbl">Autonomia media</div><div class="sc-val">${avgAuto!==null?N1(avgAuto):"n/d"}<small> gg</small></div><div class="sc-sub">Media 3gg consumo</div></div>
+    <div class="sc ${nAlertAuto?"red":"green"}"><div class="sc-lbl">Alert autonomia</div><div class="sc-val">${nAlertAuto}</div><div class="sc-sub">Silos sotto 3 giorni</div></div>
+    <div class="sc ${nAlertDist?"amber":"green"}"><div class="sc-lbl">Alert distribuito</div><div class="sc-val">${nAlertDist}</div><div class="sc-sub">|Δ| oltre il 10%</div></div>`;
+
+  // ── Tabla
+  document.getElementById("silos-table").innerHTML = rows
+    .sort((a,b)=>dateSortKey(b.Date).localeCompare(dateSortKey(a.Date)) || SILOS_LIST.indexOf(a.Silo)-SILOS_LIST.indexOf(b.Silo))
+    .map(r=>{
+      const cls = r.Alert_Autonomia ? " class='row-alert'" : (r.Alert_Distribuito ? " class='row-warn'" : "");
+      return `<tr${cls}><td>${r.Silo}</td><td style="white-space:nowrap">${r.Date}</td><td>${r.Stalla}</td><td>${r.Contenuto}</td><td>${r.Destinazione}</td><td>${N1(r.Stock_qt)}</td><td>${N0(r.Riempimento_pct)}%</td><td>${r.Distribuito_kg!==null?N0(r.Distribuito_kg):"n/d"}</td><td>${pillDelta(r.Delta_pct)}</td><td>${r.Media_3gg_kg!==null?N0(r.Media_3gg_kg):"n/d"}</td>${cellAutonomia(r.Autonomia_gg)}</tr>`;
+    }).join("");
+
+  // ── Evolutivo últimos 15 días (hasta la fecha seleccionada)
+  const last15 = allDates.slice(dateIdx, dateIdx+15).reverse();
+  const dayRows = d => DATA_SILOS.filter(r=>r.Date===d && (activeSilo==="ALL"||r.Silo===activeSilo));
+  const lblSuffix = activeSilo==="ALL" ? "Totale silos" : activeSilo;
+
+  const stockData = last15.map(d=>{ const dr=dayRows(d); return dr.length ? dr.reduce((s,r)=>s+Math.max(0,n(r.Stock_qt)),0) : null; });
+  const distData  = last15.map(d=>{ const dr=dayRows(d); return dr.length ? dr.reduce((s,r)=>s+Math.max(0,n(r.Distribuito_kg)),0) : null; });
+
+  document.getElementById("chartSilosStock-title").textContent = `Evolutivo Stock (qt) · ${lblSuffix} · ultimi 15 giorni`;
+  document.getElementById("chartSilosDist-title").textContent  = `Evolutivo Distribuito (kg) · ${lblSuffix} · ultimi 15 giorni`;
+  lineChart("chartSilosStock", last15.map(fmtLabel), [
+    { label:"Stock (qt)", data:stockData, borderColor:"#0284C7", backgroundColor:"#0284C720", borderWidth:2, pointRadius:3, tension:.3, fill:false }
+  ], "quintali");
+  const distDatasets = [
+    { label:"Distribuito (kg)", data:distData, borderColor:"#FBA94C", backgroundColor:"#FBA94C20", borderWidth:2, pointRadius:3, tension:.3, fill:false }
+  ];
+  if (activeSilo!=="ALL") {
+    distDatasets.push({ label:"Media 3gg (kg)", data:last15.map(d=>{ const dr=dayRows(d); return dr.length && dr[0].Media_3gg_kg!==null ? +dr[0].Media_3gg_kg : null; }), borderColor:"#0284C7", backgroundColor:"#0284C720", borderWidth:2, pointRadius:2, tension:.3, fill:false, borderDash:[5,4] });
+  }
+  lineChart("chartSilosDist", last15.map(fmtLabel), distDatasets, "kg");
+
+  // ── Semáforo de autonomía (snapshot fecha seleccionada, más crítico arriba)
+  const barsRows = snap.slice().sort((a,b)=>{
+    const av=a.Autonomia_gg===null?1e9:+a.Autonomia_gg;
+    const bv=b.Autonomia_gg===null?1e9:+b.Autonomia_gg;
+    return av-bv;
+  });
+  document.getElementById("silos-auto-title").textContent = `Giorni residui per silo · ${latestSelected}`;
+  const maxA = Math.max(...barsRows.map(r=>r.Autonomia_gg===null?0:+r.Autonomia_gg), 1);
+  document.getElementById("silos-autonomia-bars").innerHTML = barsRows.map(r=>{
+    const v = r.Autonomia_gg===null?null:+r.Autonomia_gg;
+    const w = v===null?4:Math.min(Math.max(v/maxA*100,6),100);
+    const col = v===null?"#94A3B8":v<3?"#DC2626":v<5?"#D97706":"#16A34A";
+    return `<div class="var-bar-row"><div class="var-bar-lbl" style="width:96px;text-align:left">${r.Silo}</div><div class="var-bar-track"><div class="var-bar-fill" style="width:${w}%;background:${col}"></div></div><div class="var-bar-pct" style="width:56px;color:${col}">${v===null?"n/d":N1(v)+" gg"}</div></div>`;
+  }).join("");
+}
+
 document.getElementById("hdr-date").textContent  = "Agg. " + AGGIORNATO;
 document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO;
 </script>
 </body>
 </html>
-<!-- deploy:1786920744912 -->
+<!-- deploy:1786922988917 -->
