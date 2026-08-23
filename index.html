@@ -456,7 +456,8 @@ tr.row-alert td{background:#FCE8E6;}
   <div class="card"><div class="card-title">Variazione SS% vs Media 7gg · Semaforo per Gruppo</div><div id="var-bars-content"></div></div>
   <div id="san-table-anchor"></div>
   <div class="table-hero-label"><span class="table-hero-tag">Tabella principale</span><h2 class="table-hero-title">Riepilogo Giornaliero</h2></div>
-  <div class="card table-hero-card"><div class="tbl-wrap tbl-scroll tbl-scroll-lg"><table><thead><tr><th>Gruppo</th><th>Data</th><th>Tipo</th><th>Capi</th><th>Ing. SS</th><th>Media SS 7d</th><th>Var SS%</th><th>Ing. TQ</th><th>Media TQ 7d</th><th>Var TQ%</th></tr></thead><tbody id="san-table"></tbody></table></div></div>
+  <div class="card table-hero-card"><div class="tbl-wrap tbl-scroll tbl-scroll-lg"><table><thead><tr><th>Gruppo</th><th>Data</th><th>Tipo</th><th>Capi</th><th>Ing. SS</th><th>Media SS 7d</th><th>Var SS%</th><th>Ing. TQ</th><th>Media TQ 7d</th><th>Var TQ%</th></tr></thead><tbody id="san-summary"></tbody>
+    <tbody id="san-table"></tbody></table></div></div>
   <div class="card glossary-card">
     <div class="card-title">Note e Definizioni</div>
     <dl class="glossary-list">
@@ -489,6 +490,7 @@ tr.row-alert td{background:#FCE8E6;}
   <p class="sec-lbl">Stato Silos</p>
   <div class="card"><div class="tbl-wrap tbl-scroll"><table>
     <thead><tr><th>Silo</th><th>Data</th><th>Stalla</th><th>Contenuto</th><th>Dest.</th><th>Stock (qt)</th><th>Riemp. %</th><th>Distribuito (kg)</th><th>Δ% g/g</th><th>Media 3gg (kg)</th><th>Autonomia (gg)</th></tr></thead>
+    <tbody id="silos-summary"></tbody>
     <tbody id="silos-table"></tbody></table>
     <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--grey-line);font-size:11px;color:var(--grey-text);line-height:1.7;">
       <b style="color:var(--black2)">Autonomia</b> — giorni residui = stock (qt) ÷ consumo medio degli ultimi 3 giorni. <span style="color:#DC2626;font-weight:600">Rosso</span> sotto 3 gg, <span style="color:#D97706;font-weight:600">ambra</span> sotto 5 gg.<br>
@@ -1001,7 +1003,43 @@ function renderSanita() {
   }
   lineChart("chartSS", ssLabels, [{ label:ssLineLabel, data:ssData, borderColor:ssLineColor, backgroundColor:ssLineColor+"20", borderWidth:activeGrp.san==="ALL"?2.5:2, pointRadius:3, tension:.3, fill:false }], "SS/capo [kg]");
   document.getElementById("chartSS-title").textContent="Ingestione Sostanza Secca per Capo · "+ssTitleSuffix;
-  document.getElementById("san-table").innerHTML=rows.sort((a,b)=>dateSortKey(b.Date).localeCompare(dateSortKey(a.Date))||(+a.CreGR-+b.CreGR)).map(r=>{ const varSS=varPct(r.Ingestione_SS_capo,r.Media_SS_7d); const varTQ=varPct(r.Ingestione_TQ_capo,r.Media_TQ_7d); return `<tr${rowCls(varSS)}><td>${r.CreGR}</td><td>${r.Date}</td>${cellTipo(r.Tipo_Gruppo)}<td>${N0(r.Numero_Capi)}</td><td>${N1(r.Ingestione_SS_capo)}</td><td>${N1(r.Media_SS_7d)}</td><td>${pillVar(varSS)}</td><td>${N1(r.Ingestione_TQ_capo)}</td><td>${N1(r.Media_TQ_7d)}</td><td>${pillVar(varTQ)}</td></tr>`; }).join("");
+  // ── Summary fila promedio del período
+const sanDKeysSorted = dates.map(d=>dateSortKey(d)).sort();
+const sanDesde = dates.find(d=>dateSortKey(d)===sanDKeysSorted[0]);
+const sanHasta = dates.find(d=>dateSortKey(d)===sanDKeysSorted[sanDKeysSorted.length-1]);
+const sanDataCell = sanDesde !== sanHasta ? `${sanDesde} – ${sanHasta}` : sanDesde;
+const sanGrpsSel = activeGrp.san === "ALL"
+  ? [...new Set(rows.map(r=>String(r.CreGR)))].sort((a,b)=>+a-+b)
+  : [activeGrp.san];
+const sanGrpCell = sanGrpsSel.length <= 4
+  ? sanGrpsSel.map(g=>"Gr."+g).join(", ")
+  : `Tutti i gruppi (${sanGrpsSel.length})`;
+const sanTipiList = [...new Set(rows.map(r=>r.Tipo_Gruppo||tipoGruppo(r.CreGR)))].join(", ");
+const sanAvgCapi = rows.length ? Math.round(rows.reduce((s,r)=>s+n(r.Numero_Capi),0)/rows.length) : 0;
+const sanSSValid = rows.filter(r=>n(r.Ingestione_SS_capo)>0);
+const sanAvgSS = sanSSValid.length ? sanSSValid.reduce((s,r)=>s+n(r.Ingestione_SS_capo),0)/sanSSValid.length : 0;
+const sanM7Valid = rows.filter(r=>n(r.Media_SS_7d)>0);
+const sanAvgM7SS = sanM7Valid.length ? sanM7Valid.reduce((s,r)=>s+n(r.Media_SS_7d),0)/sanM7Valid.length : 0;
+const sanTQValid = rows.filter(r=>n(r.Ingestione_TQ_capo)>0);
+const sanAvgTQ = sanTQValid.length ? sanTQValid.reduce((s,r)=>s+n(r.Ingestione_TQ_capo),0)/sanTQValid.length : 0;
+const sanM7TQValid = rows.filter(r=>n(r.Media_TQ_7d)>0);
+const sanAvgM7TQ = sanM7TQValid.length ? sanM7TQValid.reduce((s,r)=>s+n(r.Media_TQ_7d),0)/sanM7TQValid.length : 0;
+const sanVarSS = sanAvgM7SS ? ((sanAvgSS-sanAvgM7SS)/sanAvgM7SS*100) : null;
+const sanVarTQ = sanAvgM7TQ ? ((sanAvgTQ-sanAvgM7TQ)/sanAvgM7TQ*100) : null;
+const sanPillAvg = (v) => { if(v===null) return "—"; const col=v>5?"#16A34A":v<-5?"#DC2626":v<-2?"#D97706":"#64748B"; return `<span class="pill" style="background:${col}20;color:${col};font-weight:700">${PCT(v)}</span>`; };
+document.getElementById("san-summary").innerHTML = `<tr style="background:var(--blue-bg)">
+  <td style="font-weight:700;color:var(--blue-dark)">${sanGrpCell}</td>
+  <td style="white-space:nowrap">${sanDataCell}</td>
+  <td>${sanTipiList}</td>
+  <td>${N0(sanAvgCapi)} avg</td>
+  <td>${N1(sanAvgSS)}</td>
+  <td>${N1(sanAvgM7SS)}</td>
+  <td>${sanPillAvg(sanVarSS)}</td>
+  <td>${N1(sanAvgTQ)}</td>
+  <td>${N1(sanAvgM7TQ)}</td>
+  <td>${sanPillAvg(sanVarTQ)}</td>
+</tr>`;
+document.getElementById("san-table").innerHTML=rows.sort((a,b)=>dateSortKey(b.Date).localeCompare(dateSortKey(a.Date))||(+a.CreGR-+b.CreGR)).map(r=>{ const varSS=varPct(r.Ingestione_SS_capo,r.Media_SS_7d); const varTQ=varPct(r.Ingestione_TQ_capo,r.Media_TQ_7d); return `<tr${rowCls(varSS)}><td>${r.CreGR}</td><td>${r.Date}</td>${cellTipo(r.Tipo_Gruppo)}<td>${N0(r.Numero_Capi)}</td><td>${N1(r.Ingestione_SS_capo)}</td><td>${N1(r.Media_SS_7d)}</td><td>${pillVar(varSS)}</td><td>${N1(r.Ingestione_TQ_capo)}</td><td>${N1(r.Media_TQ_7d)}</td><td>${pillVar(varTQ)}</td></tr>`; }).join("");
   const grpVarAgg={};
   rankingRows.forEach(r=>{ const g=r.CreGR; if(!grpVarAgg[g]) grpVarAgg[g]=[]; const vp=varPct(r.Ingestione_SS_capo,r.Media_SS_7d); if(vp!==null) grpVarAgg[g].push(vp); });
   const varSorted=Object.entries(grpVarAgg).filter(([g,vals])=>vals.length>0).map(([g,vals])=>(({CreGR:g,Var_SS_pct:vals.reduce((a,b)=>a+b,0)/vals.length}))).sort((a,b)=>b.Var_SS_pct-a.Var_SS_pct);
@@ -1060,14 +1098,49 @@ function renderSilos() {
     <div class="sc ${nAlertDist?"amber":"green"}"><div class="sc-lbl">Alert distribuito</div><div class="sc-val">${nAlertDist}</div><div class="sc-sub">|Δ| oltre il 10%</div></div>`;
 
   // ── Tabla
-  document.getElementById("silos-table").innerHTML = rows
+  // ── Summary fila promedio del período
+const siloDKeysSorted = dates.slice().sort((a,b)=>dateSortKey(a).localeCompare(dateSortKey(b)));
+const siloDesde = siloDKeysSorted[0];
+const siloHasta = siloDKeysSorted[siloDKeysSorted.length-1];
+const siloDataCell = siloDesde !== siloHasta ? `${siloDesde} – ${siloHasta}` : siloDesde;
+const siloGrpCell = activeSilo === "ALL" ? `Tutti (${SILOS_LIST.length} silos)` : activeSilo;
+const siloStockValid = rows.filter(r=>r.Stock_qt!==null&&r.Stock_qt>0);
+const siloAvgStock = siloStockValid.length ? siloStockValid.reduce((s,r)=>s+n(r.Stock_qt),0)/siloStockValid.length : 0;
+const siloRiempValid = rows.filter(r=>r.Riempimento_pct!==null);
+const siloAvgRiemp = siloRiempValid.length ? siloRiempValid.reduce((s,r)=>s+n(r.Riempimento_pct),0)/siloRiempValid.length : 0;
+const siloDistValid = rows.filter(r=>r.Distribuito_kg!==null&&r.Distribuito_kg>0);
+const siloAvgDist = siloDistValid.length ? siloDistValid.reduce((s,r)=>s+n(r.Distribuito_kg),0)/siloDistValid.length : 0;
+const siloDeltaValid = rows.filter(r=>r.Delta_pct!==null&&!isNaN(+r.Delta_pct));
+const siloAvgDelta = siloDeltaValid.length ? siloDeltaValid.reduce((s,r)=>s+n(r.Delta_pct),0)/siloDeltaValid.length : null;
+const siloM3Valid = rows.filter(r=>r.Media_3gg_kg!==null&&r.Media_3gg_kg>0);
+const siloAvgM3 = siloM3Valid.length ? siloM3Valid.reduce((s,r)=>s+n(r.Media_3gg_kg),0)/siloM3Valid.length : 0;
+const siloAutoValid = rows.filter(r=>r.Autonomia_gg!==null&&!isNaN(+r.Autonomia_gg));
+const siloAvgAutoVal = siloAutoValid.length ? siloAutoValid.reduce((s,r)=>s+n(r.Autonomia_gg),0)/siloAutoValid.length : null;
+const siloSumDelta = siloAvgDelta!==null ? pillDelta(siloAvgDelta) : "<span class='pill pill-fl'>n/d</span>";
+const siloSumAuto = siloAvgAutoVal!==null
+  ? (siloAvgAutoVal<3?`<td style="color:#DC2626;font-weight:800">${N1(siloAvgAutoVal)} avg</td>`
+    :siloAvgAutoVal<5?`<td style="color:#D97706;font-weight:700">${N1(siloAvgAutoVal)} avg</td>`
+    :`<td style="font-weight:600">${N1(siloAvgAutoVal)} avg</td>`)
+  : "<td>n/d</td>";
+document.getElementById("silos-summary").innerHTML = `<tr style="background:var(--blue-bg)">
+  <td style="font-weight:700;color:var(--blue-dark)">${siloGrpCell}</td>
+  <td style="white-space:nowrap">${siloDataCell}</td>
+  <td>—</td><td>—</td><td>—</td>
+  <td>${N1(siloAvgStock)} avg</td>
+  <td>${N0(siloAvgRiemp)}% avg</td>
+  <td>${N0(siloAvgDist)} avg</td>
+  <td>${siloSumDelta}</td>
+  <td>${N0(siloAvgM3)} avg</td>
+  ${siloSumAuto}
+</tr>`;
+document.getElementById("silos-table").innerHTML = rows
     .sort((a,b)=>dateSortKey(b.Date).localeCompare(dateSortKey(a.Date)) || SILOS_LIST.indexOf(a.Silo)-SILOS_LIST.indexOf(b.Silo))
     .map(r=>{
       const cls = r.Alert_Autonomia ? " class='row-alert'" : (r.Alert_Distribuito ? " class='row-warn'" : "");
       return `<tr${cls}><td>${r.Silo}</td><td style="white-space:nowrap">${r.Date}</td><td>${r.Stalla}</td><td>${r.Contenuto}</td><td>${r.Destinazione}</td><td>${N1(r.Stock_qt)}</td><td>${N0(r.Riempimento_pct)}%</td><td>${r.Distribuito_kg!==null?N0(r.Distribuito_kg):"n/d"}</td><td>${pillDelta(r.Delta_pct)}</td><td>${r.Media_3gg_kg!==null?N0(r.Media_3gg_kg):"n/d"}</td>${cellAutonomia(r.Autonomia_gg)}</tr>`;
     }).join("");
 
-  // ── Evolutivo últimos 15 días (hasta la fecha seleccionada)
+  
   const last15 = allDates.slice(dateIdx, dateIdx+15).reverse();
   const dayRows = d => DATA_SILOS.filter(r=>r.Date===d && (activeSilo==="ALL"||r.Silo===activeSilo));
   const lblSuffix = activeSilo==="ALL" ? "Totale silos" : activeSilo;
@@ -1088,7 +1161,7 @@ function renderSilos() {
   }
   lineChart("chartSilosDist", last15.map(fmtLabel), distDatasets, "kg");
 
-  // ── Semáforo de autonomía (snapshot fecha seleccionada, más crítico arriba)
+  
   const barsRows = snap.slice().sort((a,b)=>{
     const av=a.Autonomia_gg===null?1e9:+a.Autonomia_gg;
     const bv=b.Autonomia_gg===null?1e9:+b.Autonomia_gg;
@@ -1116,38 +1189,15 @@ function renderSilosIcons(snap, dateLabel) {
     const v = r.Autonomia_gg===null?null:+r.Autonomia_gg;
     const riemp = Math.max(0,Math.min(100,+r.Riempimento_pct||0));
     const col = v===null?"#94A3B8":v<3?"#DC2626":v<5?"#D97706":"#16A34A";
-    const stroke = v===null?"#94A3B8":v<3?"#DC2626":v<5?"#D97706":"#16A34A";
+    const stroke = col;
     const strokeDash = r.Distribuito_kg===null?"4 2":"none";
     const isActive = activeSilo===r.Silo;
-    // Nivel de llenado: el cuerpo del silo va de y=28 (techo) a y=92 (base) = 64px de alto
-    // riemp% = qué tan lleno está, de abajo hacia arriba
-    const bodyH = 64; // altura útil del cuerpo
+    const bodyH = 64;
     const fillH = Math.max(0, Math.min(bodyH, riemp/100 * bodyH));
-    const fillY = 92 - fillH; // el fill arranca desde abajo
+    const fillY = 92 - fillH;
     const fillOpacity = v===null?0.15:0.25;
-    const waveY = fillY;
-    return `<div class="silo-icon-card${isActive?' silo-active':''}" onclick="setSilo('${r.Silo}')">
-      <svg width="60" height="84" viewBox="0 0 72 104" style="display:block">
-        <defs>
-          <clipPath id="clip-${r.Silo.replace(/\s/g,'_')}">
-            <path d="M10 28 L36 8 L62 28 L62 92 Q62 96 58 96 L14 96 Q10 96 10 92 Z"/>
-          </clipPath>
-        </defs>
-        <!-- cuerpo del silo -->
-        <path d="M10 28 L36 8 L62 28 L62 92 Q62 96 58 96 L14 96 Q10 96 10 92 Z" fill="var(--grey-bg)" stroke="${stroke}" stroke-width="${v===null?1.5:2}" stroke-dasharray="${strokeDash}"/>
-        <!-- relleno de nivel -->
-        <rect x="10" y="${fillY}" width="52" height="${fillH + 4}" clip-path="url(#clip-${r.Silo.replace(/\s/g,'_')})" fill="${col}" opacity="${fillOpacity}"/>
-        <!-- línea de nivel (ola) -->
-        ${fillH > 2 ? `<rect x="10" y="${waveY}" width="52" height="3" clip-path="url(#clip-${r.Silo.replace(/\s/g,'_')})" fill="${col}" opacity="0.55"/>` : ''}
-        <!-- texto % dentro -->
-        <text x="36" y="${Math.max(50, fillY - 6 < 40 ? 50 : fillY - 6)}" text-anchor="middle" font-size="10" font-weight="700" fill="${col}" font-family="Roboto,sans-serif">${Math.round(riemp)}%</text>
-        <!-- soporte inferior -->
-        <line x1="36" y1="96" x2="36" y2="102" stroke="${stroke}" stroke-width="2.5"/>
-        <circle cx="36" cy="102" r="2.5" fill="${stroke}"/>
-      </svg>
-      <div class="silo-icon-name">${r.Silo}</div>
-      <div class="silo-icon-auto" style="color:${col}">${v===null?"n/d":N1(v)+" gg"}</div>
-    </div>`;
+    const safeId = r.Silo.replace(/[^a-zA-Z0-9]/g,"_");
+    return `<div class="silo-icon-card${isActive?" silo-active":""}" onclick="setSilo('${r.Silo}')">\n      <svg width="60" height="84" viewBox="0 0 72 104" style="display:block">\n        <defs><clipPath id="clip-${safeId}"><path d="M10 28 L36 8 L62 28 L62 92 Q62 96 58 96 L14 96 Q10 96 10 92 Z"/></clipPath></defs>\n        <path d="M10 28 L36 8 L62 28 L62 92 Q62 96 58 96 L14 96 Q10 96 10 92 Z" fill="var(--grey-bg)" stroke="${col}" stroke-width="${v===null?1.5:2}" stroke-dasharray="${strokeDash}"/>\n        <rect x="10" y="${fillY}" width="52" height="${fillH + 4}" clip-path="url(#clip-${safeId})" fill="${col}" opacity="${fillOpacity}"/>\n        ${fillH > 2 ? `<rect x="10" y="${fillY}" width="52" height="3" clip-path="url(#clip-${safeId})" fill="${col}" opacity="0.55"/>` : ""}\n        <text x="36" y="${Math.max(50, fillY - 6 < 42 ? 50 : fillY - 6)}" text-anchor="middle" font-size="10" font-weight="700" fill="${col}" font-family="Roboto,sans-serif">${Math.round(riemp)}%</text>\n        <line x1="36" y1="96" x2="36" y2="102" stroke="${col}" stroke-width="2.5"/>\n        <circle cx="36" cy="102" r="2.5" fill="${col}"/>\n      </svg>\n      <div class="silo-icon-name">${r.Silo}</div>\n      <div class="silo-icon-auto" style="color:${col}">${v===null?"n/d":N1(v)+" gg"}</div>\n    </div>`;
   }).join("");
 }
 
@@ -1156,4 +1206,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1787528136068 -->
+<!-- deploy:1787528838495 -->
