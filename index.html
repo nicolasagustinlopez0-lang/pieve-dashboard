@@ -456,8 +456,8 @@ tr.row-alert td{background:#FCE8E6;}
   <div class="card"><div class="card-title">Variazione SS% vs Media 7gg · Semaforo per Gruppo</div><div id="var-bars-content"></div></div>
   <div id="san-table-anchor"></div>
   <div class="table-hero-label"><span class="table-hero-tag">Tabella principale</span><h2 class="table-hero-title">Riepilogo Giornaliero</h2></div>
-  <div class="card table-hero-card"><div class="tbl-wrap tbl-scroll tbl-scroll-lg"><table><thead><tr><th>Gruppo</th><th>Data</th><th>Tipo</th><th>Capi</th><th>Ing. SS</th><th>Media SS 7d</th><th>Var SS%</th><th>Ing. TQ</th><th>Media TQ 7d</th><th>Var TQ%</th></tr></thead><tbody id="san-summary"></tbody>
-    <tbody id="san-table"></tbody></table></div></div>
+  <div class="card" style="margin-bottom:10px;"><div class="tbl-wrap"><table><thead><tr><th>Gruppo</th><th>Data</th><th>Tipo</th><th>Capi</th><th>Ing. SS</th><th>Media SS 7d</th><th>Var SS%</th><th>Ing. TQ</th><th>Media TQ 7d</th><th>Var TQ%</th></tr></thead><tbody id="san-summary"></tbody></table></div></div>
+  <div class="card table-hero-card"><div class="tbl-wrap tbl-scroll tbl-scroll-lg"><table><thead><tr><th>Gruppo</th><th>Data</th><th>Tipo</th><th>Capi</th><th>Ing. SS</th><th>Media SS 7d</th><th>Var SS%</th><th>Ing. TQ</th><th>Media TQ 7d</th><th>Var TQ%</th></tr></thead><tbody id="san-table"></tbody></table></div></div>
   <div class="card glossary-card">
     <div class="card-title">Note e Definizioni</div>
     <dl class="glossary-list">
@@ -488,9 +488,12 @@ tr.row-alert td{background:#FCE8E6;}
     </div>
   </div>
   <p class="sec-lbl">Stato Silos</p>
-  <div class="card"><div class="tbl-wrap tbl-scroll"><table>
+  <div class="card" style="margin-bottom:10px;"><div class="tbl-wrap"><table>
     <thead><tr><th>Silo</th><th>Data</th><th>Stalla</th><th>Contenuto</th><th>Dest.</th><th>Stock (qt)</th><th>Riemp. %</th><th>Distribuito (kg)</th><th>Δ% g/g</th><th>Media 3gg (kg)</th><th>Autonomia (gg)</th></tr></thead>
     <tbody id="silos-summary"></tbody>
+  </table></div></div>
+  <div class="card"><div class="tbl-wrap tbl-scroll"><table>
+    <thead><tr><th>Silo</th><th>Data</th><th>Stalla</th><th>Contenuto</th><th>Dest.</th><th>Stock (qt)</th><th>Riemp. %</th><th>Distribuito (kg)</th><th>Δ% g/g</th><th>Media 3gg (kg)</th><th>Autonomia (gg)</th></tr></thead>
     <tbody id="silos-table"></tbody></table>
     <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--grey-line);font-size:11px;color:var(--grey-text);line-height:1.7;">
       <b style="color:var(--black2)">Autonomia</b> — giorni residui = stock (qt) ÷ consumo medio degli ultimi 3 giorni. <span style="color:#DC2626;font-weight:600">Rosso</span> sotto 3 gg, <span style="color:#D97706;font-weight:600">ambra</span> sotto 5 gg.<br>
@@ -1206,4 +1209,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1787528838495 -->
+<!-- deploy:1787529216749 -->
