@@ -411,7 +411,7 @@ tr.row-alert td{background:#FCE8E6;}
   <p class="sec-lbl">Riepilogo Produzione Latte</p>
   <div class="sc-grid sc-grid-3" id="prod-scorecards"></div>
   <div class="card chart-card"><div class="card-title" id="chartTotaleLatte-title">Totale Latte Aziendale (L) · Ultimi 15 giorni</div><div class="chart-wrap"><canvas id="chartTotaleLatte"></canvas></div></div>
-  <p class="sec-lbl">Dettaglio per Gruppo</p>
+  <div class="table-hero-label"><span class="table-hero-tag">Tabella principale</span><h2 class="table-hero-title">Riepilogo Giornaliero</h2></div>
   <div class="card" style="margin-bottom:10px;">
   <div class="tbl-wrap"><table>
     <thead><tr><th>Gruppo</th><th>Data</th><th>Tipo</th><th>Animali</th><th>Gg Latt</th><th>Media Latt</th><th>Latte Oggi</th><th>Media 3gg</th><th>Delta %</th></tr></thead>
@@ -836,8 +836,9 @@ function renderProduzione() {
   const allDates = allDatesCache.prod;
   const dateIdx  = allDates.indexOf(latestSelected);
   const prevDate = allDates[dateIdx + 1] || null;
-  buildGrpFilter("prod-grp-filters","prod", DATA_ANIMALI, "renderProduzione");
-  const rows = DATA_ANIMALI.filter(r => dates.includes(r.Date) && (activeGrp.prod==="ALL"||String(r.CreGR)===activeGrp.prod));
+  buildGrpFilter("prod-grp-filters","prod", DATA_ANIMALI.filter(r=>!["28","29","30"].includes(String(r.CreGR))), "renderProduzione");
+  const PROD_EXCL = ["28","29","30"];
+  const rows = DATA_ANIMALI.filter(r => dates.includes(r.Date) && !PROD_EXCL.includes(String(r.CreGR)) && (activeGrp.prod==="ALL"||String(r.CreGR)===activeGrp.prod));
   const prevRows = prevDate ? DATA_ANIMALI.filter(r=>r.Date===prevDate && (activeGrp.prod==="ALL"||String(r.CreGR)===activeGrp.prod)) : [];
   const rowsWithLatte = rows.filter(r=>n(r.MdLAG01)>0);
   const animaliByDate = dates.map(d => { const dayRows = rows.filter(r => r.Date === d); return dayRows.reduce((s,r) => s + n(r.Numero_Capi), 0); });
@@ -1200,7 +1201,7 @@ function renderSilosIcons(snap, dateLabel) {
     const fillY = 92 - fillH;
     const fillOpacity = v===null?0.15:0.25;
     const safeId = r.Silo.replace(/[^a-zA-Z0-9]/g,"_");
-    return `<div class="silo-icon-card${isActive?" silo-active":""}" onclick="setSilo('${r.Silo}')">\n      <svg width="60" height="84" viewBox="0 0 72 104" style="display:block">\n        <defs><clipPath id="clip-${safeId}"><path d="M10 28 L36 8 L62 28 L62 92 Q62 96 58 96 L14 96 Q10 96 10 92 Z"/></clipPath></defs>\n        <path d="M10 28 L36 8 L62 28 L62 92 Q62 96 58 96 L14 96 Q10 96 10 92 Z" fill="var(--grey-bg)" stroke="${col}" stroke-width="${v===null?1.5:2}" stroke-dasharray="${strokeDash}"/>\n        <rect x="10" y="${fillY}" width="52" height="${fillH + 4}" clip-path="url(#clip-${safeId})" fill="${col}" opacity="${fillOpacity}"/>\n        ${fillH > 2 ? `<rect x="10" y="${fillY}" width="52" height="3" clip-path="url(#clip-${safeId})" fill="${col}" opacity="0.55"/>` : ""}\n        <text x="36" y="${Math.max(50, fillY - 6 < 42 ? 50 : fillY - 6)}" text-anchor="middle" font-size="10" font-weight="700" fill="${col}" font-family="Roboto,sans-serif">${Math.round(riemp)}%</text>\n        <line x1="36" y1="96" x2="36" y2="102" stroke="${col}" stroke-width="2.5"/>\n        <circle cx="36" cy="102" r="2.5" fill="${col}"/>\n      </svg>\n      <div class="silo-icon-name">${r.Silo}</div>\n      <div class="silo-icon-auto" style="color:${col}">${v===null?"n/d":N1(v)+" gg"}</div>\n    </div>`;
+    return `<div class="silo-icon-card${isActive?" silo-active":""}" onclick="setSilo('${r.Silo}')">\n      <svg width="60" height="84" viewBox="0 0 72 104" style="display:block">\n        <defs><clipPath id="clip-${safeId}"><path d="M10 28 L36 8 L62 28 L62 92 Q62 96 58 96 L14 96 Q10 96 10 92 Z"/></clipPath></defs>\n        <path d="M10 28 L36 8 L62 28 L62 92 Q62 96 58 96 L14 96 Q10 96 10 92 Z" fill="var(--grey-bg)" stroke="${col}" stroke-width="${v===null?1.5:2}" stroke-dasharray="${strokeDash}"/>\n        <rect x="10" y="${fillY}" width="52" height="${fillH + 4}" clip-path="url(#clip-${safeId})" fill="${col}" opacity="${fillOpacity}"/>\n        ${fillH > 2 ? `<rect x="10" y="${fillY}" width="52" height="3" clip-path="url(#clip-${safeId})" fill="${col}" opacity="0.55"/>` : ""}\n        <text x="36" y="${Math.max(50, fillY - 6 < 42 ? 50 : fillY - 6)}" text-anchor="middle" font-size="10" font-weight="700" fill="${col}" font-family="Roboto,sans-serif">${Math.round(riemp)}%</text>\n        <line x1="36" y1="96" x2="36" y2="102" stroke="${col}" stroke-width="2.5"/>\n        <circle cx="36" cy="102" r="2.5" fill="${col}"/>\n      </svg>\n      <div class="silo-icon-name">${r.Silo}</div>\n      <div class="silo-icon-auto" style="color:${col}">${v===null?"n/d":N1(v)+" gg"}</div>\n      <div style="font-size:9px;color:var(--grey-text);font-weight:500">180 qt</div>\n    </div>`;
   }).join("");
 }
 
@@ -1209,4 +1210,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </script>
 </body>
 </html>
-<!-- deploy:1788132897831 -->
+<!-- deploy:1788138781721 -->
