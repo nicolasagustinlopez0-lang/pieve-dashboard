@@ -620,6 +620,7 @@ const N1   = v => (v===""||v==null||isNaN(+v)) ? "—" : (+v).toFixed(1);
 const N0   = v => (v===""||v==null||isNaN(+v)) ? "—" : Math.round(+v).toLocaleString("it-IT");
 const PCT  = v => (v===""||v==null||isNaN(+v)) ? "—" : ((+v>0?"+":"")+((+v).toFixed(1))+"%");
 const n    = v => +v || 0;
+const round2_ = v => Math.round((+v || 0) * 100) / 100;
 
 function varPct(value, media7d) {
   const v = n(value), m = n(media7d);
@@ -1269,10 +1270,10 @@ function renderSilosIcons(snap, dateLabel) {
 
 // ══ ROBOT DI MUNGITURA ═════════════════════════════════════════════════
 function renderStackedChart(canvasId, labels, datasets) {
+  killChart(canvasId);
   const ctx = document.getElementById(canvasId);
   if (!ctx) return;
-  if (charts[canvasId]) charts[canvasId].destroy();
-  charts[canvasId] = new Chart(ctx, {
+  CHS[canvasId] = new Chart(ctx, {
     type: 'bar',
     data: { labels: labels, datasets: datasets },
     options: {
@@ -1365,4 +1366,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </html>
 
 
-<!-- deploy:1789788454692 -->
+<!-- deploy:1789788810307 -->
