@@ -616,20 +616,20 @@ const DATA_SILOS      = [
 ];
 const DATA_ROBOT      = {
   ddi: [
-    {"Data":"28/08/2026","CodiceInterval":101,"GruppoIntervallo":"101â€“102","RisultatoVisita":"avvenuto con successo","IntervalloOre":8.5,"LatteKg":12.4,"ClasseIntervallo":"regolare","IsAlert":false,"NumeroCapo":"IT019990182736"},
-    {"Data":"28/08/2026","CodiceInterval":105,"GruppoIntervallo":"105â€“106","RisultatoVisita":"autonomia robot","IntervalloOre":5.2,"LatteKg":6.1,"ClasseIntervallo":"corto_bassa","IsAlert":false,"NumeroCapo":"IT019990182740"},
-    {"Data":"28/08/2026","CodiceInterval":107,"GruppoIntervallo":"107â€“108","RisultatoVisita":"calcio fallito","IntervalloOre":13.1,"LatteKg":15.8,"ClasseIntervallo":"lungo_alta","IsAlert":true,"NumeroCapo":"IT019990182799"}
+    {"Data":"28/08/2026","CodiceInterval":101,"GruppoIntervallo":"101-102","RisultatoVisita":"avvenuto con successo","IntervalloOre":8.5,"LatteKg":12.4,"ClasseIntervallo":"regolare","IsAlert":false,"NumeroCapo":"IT019990182736"},
+    {"Data":"28/08/2026","CodiceInterval":105,"GruppoIntervallo":"105-106","RisultatoVisita":"autonomia robot","IntervalloOre":5.2,"LatteKg":6.1,"ClasseIntervallo":"corto_bassa","IsAlert":false,"NumeroCapo":"IT019990182740"},
+    {"Data":"28/08/2026","CodiceInterval":107,"GruppoIntervallo":"107-108","RisultatoVisita":"calcio fallito","IntervalloOre":13.1,"LatteKg":15.8,"ClasseIntervallo":"lungo_alta","IsAlert":true,"NumeroCapo":"IT019990182799"}
   ],
   distribution: {
-    "101â€“102": {"corto_bassa":1, "corto_regolare":2, "regolare":15, "lungo_regolare":3, "lungo_alta":4, "total":25},
-    "103â€“104": {"corto_bassa":0, "corto_regolare":1, "regolare":18, "lungo_regolare":2, "lungo_alta":5, "total":26},
-    "105â€“106": {"corto_bassa":2, "corto_regolare":3, "regolare":12, "lungo_regolare":4, "lungo_alta":2, "total":23},
-    "107â€“108": {"corto_bassa":1, "corto_regolare":1, "regolare":20, "lungo_regolare":1, "lungo_alta":6, "total":29},
-    "109â€“110": {"corto_bassa":0, "corto_regolare":2, "regolare":16, "lungo_regolare":3, "lungo_alta":3, "total":24},
+    "101-102": {"corto_bassa":1, "corto_regolare":2, "regolare":15, "lungo_regolare":3, "lungo_alta":4, "total":25},
+    "103-104": {"corto_bassa":0, "corto_regolare":1, "regolare":18, "lungo_regolare":2, "lungo_alta":5, "total":26},
+    "105-106": {"corto_bassa":2, "corto_regolare":3, "regolare":12, "lungo_regolare":4, "lungo_alta":2, "total":23},
+    "107-108": {"corto_bassa":1, "corto_regolare":1, "regolare":20, "lungo_regolare":1, "lungo_alta":6, "total":29},
+    "109-110": {"corto_bassa":0, "corto_regolare":2, "regolare":16, "lungo_regolare":3, "lungo_alta":3, "total":24},
     "111":     {"corto_bassa":1, "corto_regolare":0, "regolare":14, "lungo_regolare":2, "lungo_alta":1, "total":18},
-    "112â€“113": {"corto_bassa":0, "corto_regolare":1, "regolare":19, "lungo_regolare":3, "lungo_alta":4, "total":27}
+    "112-113": {"corto_bassa":0, "corto_regolare":1, "regolare":19, "lungo_regolare":3, "lungo_alta":4, "total":27}
   },
-  robotGroups: ["101â€“102", "103â€“104", "105â€“106", "107â€“108", "109â€“110", "111", "112â€“113"],
+  robotGroups: ["101-102", "103-104", "105-106", "107-108", "109-110", "111", "112-113"],
   alimentare: [
     {"Capo":"IT019990182736","Programmato_kg":10.0,"Consumato_kg":9.5,"Residuo_kg":0.5,"PctResiduo":5.0,"Alert_Residuo":false},
     {"Capo":"IT019990182799","Programmato_kg":8.0,"Consumato_kg":3.0,"Residuo_kg":5.0,"PctResiduo":62.5,"Alert_Residuo":true}
@@ -993,7 +993,7 @@ const grpsSel = activeGrp.prod === "ALL"
 const grpCell = grpsSel.length <= 4
   ? grpsSel.map(g=>"Gr."+g).join(", ")
   : `Tutti i gruppi (${grpsSel.length})`;
-const dataCell = dDesde !== dHasta ? `${dDesde} – ${dHasta}` : dDesde;
+const dataCell = dDesde !== dHasta ? `${dDesde} - ${dHasta}` : dDesde;
 document.getElementById("prod-summary").innerHTML = `<tr style="background:var(--blue-bg)">
   <td style="font-weight:700;color:var(--blue-dark)">${grpCell}</td>
   <td style="white-space:nowrap">${dataCell}</td>
@@ -1098,7 +1098,7 @@ function renderSanita() {
 const sanDKeysSorted = dates.map(d=>dateSortKey(d)).sort();
 const sanDesde = dates.find(d=>dateSortKey(d)===sanDKeysSorted[0]);
 const sanHasta = dates.find(d=>dateSortKey(d)===sanDKeysSorted[sanDKeysSorted.length-1]);
-const sanDataCell = sanDesde !== sanHasta ? `${sanDesde} – ${sanHasta}` : sanDesde;
+const sanDataCell = sanDesde !== sanHasta ? `${sanDesde} - ${sanHasta}` : sanDesde;
 const sanGrpsSel = activeGrp.san === "ALL"
   ? [...new Set(rows.map(r=>String(r.CreGR)))].sort((a,b)=>+a-+b)
   : [activeGrp.san];
@@ -1193,7 +1193,7 @@ function renderSilos() {
 const siloDKeysSorted = dates.slice().sort((a,b)=>dateSortKey(a).localeCompare(dateSortKey(b)));
 const siloDesde = siloDKeysSorted[0];
 const siloHasta = siloDKeysSorted[siloDKeysSorted.length-1];
-const siloDataCell = siloDesde !== siloHasta ? `${siloDesde} – ${siloHasta}` : siloDesde;
+const siloDataCell = siloDesde !== siloHasta ? `${siloDesde} - ${siloHasta}` : siloDesde;
 const siloGrpCell = activeSilo === "ALL" ? `Tutti (${SILOS_LIST.length} silos)` : activeSilo;
 const siloStockValid = rows.filter(r=>r.Stock_qt!==null&&r.Stock_qt>0);
 const siloAvgStock = siloStockValid.length ? siloStockValid.reduce((s,r)=>s+n(r.Stock_qt),0)/siloStockValid.length : 0;
@@ -1320,7 +1320,7 @@ function renderRobot() {
   const ddiRows = robotData.ddi || [];
   const alimentareRows = robotData.alimentare || [];
   const dist = robotData.distribution || {};
-  const groups = robotData.robotGroups || ["101–102", "103–104", "105–106", "107–108", "109–110", "111", "112–113"];
+  const groups = robotData.robotGroups || ["101-102", "103-104", "105-106", "107-108", "109-110", "111", "112-113"];
 
   // Scorecards
   const totalVisits = ddiRows.length;
@@ -1390,4 +1390,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </html>
 <!-- deploy:1789774502416 -->
 
-<!-- deploy:1789788988933 -->
+<!-- deploy:1789789168777 -->
