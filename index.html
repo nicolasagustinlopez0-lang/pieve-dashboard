@@ -518,17 +518,120 @@ tr.row-alert td{background:#FCE8E6;}
 </div>
 
 <!-- ROBOT DI MUNGITURA -->
+<!-- ROBOT DI MUNGITURA -->
 <div class="section" id="sec-robot">
-  <p class="sec-lbl">Riepilogo Robot di Mungitura</p>
+  <p class="sec-lbl">Riepilogo e Performance Robot di Mungitura</p>
   <div class="sc-grid sc-grid-4" id="robot-scorecards"></div>
 
   <!-- CHART: Distribuzione intervallo di mungitura -->
   <div class="card chart-card">
-    <div class="card-title">Distribuzione intervallo di mungitura</div>
-    <div class="chart-wrap" style="height:320px"><canvas id="chartRobotInterval"></canvas></div>
+    <div class="card-title">Distribuzione Intervallo di Mungitura per Gruppo Robot (%)</div>
+    <div class="chart-wrap" style="height:340px"><canvas id="chartRobotInterval"></canvas></div>
     <div style="margin-top:12px;font-size:11px;color:var(--grey-text);line-height:1.6;">
-      Distribuzione degli intervalli di mungitura negli últimos 30 giorni agrupados por los 7 grupos de robot.
+      Analisi percentuale degli intervalli di mungitura negli ultimi 30 giorni raggruppati nei 7 gruppi di robot.
     </div>
+  </div>
+
+  <!-- TABLE SUMMARY: Analisi Efficienza per Gruppo Robot -->
+  <p class="sec-lbl" style="margin-top:20px">Analisi Efficienza per Gruppo Robot</p>
+  <div class="card">
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Gruppo Robot</th>
+            <th>Visite Totali</th>
+            <th>% Intervallo Regolare (6-12h)</th>
+            <th>% Corto Bassa Prod. (<6h, <8kg)</th>
+            <th>% Intervallo Lungo (>12h)</th>
+            <th>Stato Efficienza</th>
+          </tr>
+        </thead>
+        <tbody id="robot-efficiency-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RANKINGS & TOPs -->
+  <p class="sec-lbl" style="margin-top:24px">Rankings & TOP 10 Analitici</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(450px, 1fr));gap:16px;margin-bottom:20px;">
+    
+    <!-- TOP 10 Latte per Visita -->
+    <div class="card">
+      <div class="card-title" style="color:#16A34A;">ðŸ¥› TOP 10 Produzione Latte per Visita</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Capo</th>
+              <th>Gruppo</th>
+              <th>Intervallo (h)</th>
+              <th>Latte (kg)</th>
+            </tr>
+          </thead>
+          <tbody id="top-latte-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TOP 10 Allarmi Visite -->
+    <div class="card">
+      <div class="card-title" style="color:#DC2626;">âš ï¸ TOP 10 Capi con PiÃ¹ Allarmi / Falli</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Capo</th>
+              <th>Gruppo</th>
+              <th>N. Allarmi</th>
+              <th>Ultimo Esito</th>
+            </tr>
+          </thead>
+          <tbody id="top-allarmi-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TOP 10 Residuo Mangime -->
+    <div class="card">
+      <div class="card-title" style="color:#D97706;">ðŸŒ¾ TOP 10 Capi con Maggior Residuo Mangime</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Capo</th>
+              <th>Prog. (kg)</th>
+              <th>Cons. (kg)</th>
+              <th>Residuo (kg / %)</th>
+            </tr>
+          </thead>
+          <tbody id="top-residuo-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TOP 10 Intervalli Lunghi -->
+    <div class="card">
+      <div class="card-title" style="color:#0284C7;">â±ï¸ TOP 10 Intervalli PiÃ¹ Lunghi (>12h)</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Capo</th>
+              <th>Gruppo</th>
+              <th>Intervallo (ore)</th>
+              <th>Latte (kg)</th>
+            </tr>
+          </thead>
+          <tbody id="top-intervalli-table"></tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 
   <!-- TABLE 1: Allarmi Visite (DDI) -->
@@ -569,6 +672,8 @@ tr.row-alert td{background:#FCE8E6;}
         <tbody id="robot-alimentare-table"></tbody>
       </table>
     </div>
+  </div>
+</div>
   </div>
 </div>
 
@@ -1298,6 +1403,483 @@ function renderStackedChart(canvasId, labels, datasets) {
   killChart(canvasId);
   const ctx = document.getElementById(canvasId);
   if (!ctx) return;
+
+  datasets.forEach(ds => {
+    ds.datalabels = {
+      color: "#ffffff",
+      font: { size: 10, family: "Roboto", weight: "700" },
+      formatter: (val) => (val >= 4 ? Math.round(val) + "%" : ""),
+      display: (ctx) => ctx.dataset.data[ctx.dataIndex] >= 4
+    };
+  });
+
+  CHS[canvasId] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: labels, datasets: datasets },
+    plugins: [ChartDataLabels],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { stacked: true, grid: { display: false } },
+        y: { stacked: true, max: 100, ticks: { callback: v => v + '%' } }
+      },
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw + '%' } }
+      }
+    }
+  });
+}
+
+function renderRobot() {
+  const robotData = (typeof DATA_ROBOT !== "undefined" ? DATA_ROBOT : (window.DATA_ROBOT || {}));
+  const ddiRows = robotData.ddi || [];
+  const alimentareRows = robotData.alimentare || [];
+  const dist = robotData.distribution || {};
+  const groups = robotData.robotGroups || ["101-102", "103-104", "105-106", "107-108", "109-110", "111", "112-113"];
+
+  // Calculations
+  const totalVisits = ddiRows.length;
+  const alertVisits = ddiRows.filter(r => r.IsAlert).length;
+  const okVisits = totalVisits - alertVisits;
+  const successRate = totalVisits ? ((okVisits / totalVisits) * 100) : 0;
+  
+  const alertAlim = alimentareRows.filter(r => r.Alert_Residuo).length;
+  const avgHours = ddiRows.length ? (ddiRows.reduce((a,r) => a + (r.IntervalloOre||0), 0) / ddiRows.length) : 0;
+  const avgMilk = ddiRows.length ? (ddiRows.reduce((a,r) => a + (r.LatteKg||0), 0) / ddiRows.length) : 0;
+
+  // 6 Scorecards Grid
+  document.getElementById("robot-scorecards").innerHTML = 
+    <div class="sc"><div class="sc-lbl">Visite totali</div><div class="sc-val"></div></div>
+    <div class="sc "><div class="sc-lbl">Tasso di successo</div><div class="sc-val">%</div><div class="sc-sub"> visite conformi</div></div>
+    <div class="sc"><div class="sc-lbl">Intervallo medio</div><div class="sc-val"><small> ore</small></div></div>
+    <div class="sc"><div class="sc-lbl">Latte medio / visita</div><div class="sc-val"><small> kg</small></div></div>
+    <div class="sc "><div class="sc-lbl">Allarmi visite</div><div class="sc-val"></div><div class="sc-sub">Esito non conforme</div></div>
+    <div class="sc "><div class="sc-lbl">Allarmi mangime</div><div class="sc-val"></div><div class="sc-sub">Residuo â‰¥ 50%</div></div>;
+
+  // Stacked chart data
+  const cortoBassaData = [];
+  const cortoRegData = [];
+  const regData = [];
+  const lungoRegData = [];
+  const lungoAltaData = [];
+  const groupEfficiency = [];
+
+  groups.forEach(g => {
+    const d = dist[g] || { corto_bassa:0, corto_regolare:0, regolare:0, lungo_regolare:0, lungo_alta:0, total:1 };
+    const tot = d.total || 1;
+    
+    const pCortoB = round2_((d.corto_bassa / tot) * 100);
+    const pCortoR = round2_((d.corto_regolare / tot) * 100);
+    const pReg = round2_((d.regolare / tot) * 100);
+    const pLungoR = round2_((d.lungo_regolare / tot) * 100);
+    const pLungoA = round2_((d.lungo_alta / tot) * 100);
+
+    cortoBassaData.push(pCortoB);
+    cortoRegData.push(pCortoR);
+    regData.push(pReg);
+    lungoRegData.push(pLungoR);
+    lungoAltaData.push(pLungoA);
+
+    const pLungoTot = round2_(pLungoR + pLungoA);
+
+    groupEfficiency.push({
+      group: g,
+      totVisits: d.total || 0,
+      pReg: pReg,
+      pCortoB: pCortoB,
+      pLungoTot: pLungoTot
+    });
+  });
+
+  renderStackedChart("chartRobotInterval", groups, [
+    { label: "Intervallo corto (<6h) e Produzione bassa (<8kg)", data: cortoBassaData, backgroundColor: "#DC2626" },
+    { label: "Intervallo corto (<6h) e Produzione regolare (â‰¥8kg)", data: cortoRegData, backgroundColor: "#D97706" },
+    { label: "Intervallo regolare (6-12h)", data: regData, backgroundColor: "#16A34A" },
+    { label: "Intervallo lungo (>12h) e Produzione regolare (<14kg)", data: lungoRegData, backgroundColor: "#0284C7" },
+    { label: "Intervallo lungo (>12h) e alta produzione (â‰¥14kg)", data: lungoAltaData, backgroundColor: "#6366F1" }
+  ]);
+
+  // Group efficiency breakdown table
+  const effTbody = document.getElementById("robot-efficiency-table");
+  if (effTbody) {
+    effTbody.innerHTML = groupEfficiency.map(e => {
+      let pillCls = "pill-up";
+      let statusTxt = "Ottima";
+      if (e.pReg < 45) { pillCls = "pill-dn"; statusTxt = "Critica"; }
+      else if (e.pReg < 60) { pillCls = "pill-am"; statusTxt = "Moderata"; }
+
+      return <tr>
+        <td style="font-weight:700"></td>
+        <td></td>
+        <td style="color:#16A34A;font-weight:700">%</td>
+        <td style="color:#DC2626">%</td>
+        <td style="color:#0284C7">%</td>
+        <td><span class="pill "></span></td>
+      </tr>;
+    }).join("");
+  }
+
+  // â•â•â•â• COMPUTATION OF TOP RANKINGS â•â•â•â•
+  // 1. TOP 10 Produzione Latte per Visita
+  const topLatte = [...ddiRows].sort((a,b) => (b.LatteKg||0) - (a.LatteKg||0)).slice(0, 10);
+  const tbLatte = document.getElementById("top-latte-table");
+  if (tbLatte) {
+    tbLatte.innerHTML = topLatte.map((r, i) => 
+      <tr>
+        <td style="font-weight:700;color:var(--grey-text)"></td>
+        <td style="font-weight:700"></td>
+        <td></td>
+        <td>h</td>
+        <td><span class="pill pill-up"> kg</span></td>
+      </tr>
+    ).join("");
+  }
+
+  // 2. TOP 10 Allarmi / Falli
+  const alarmMap = {};
+  ddiRows.filter(r => r.IsAlert).forEach(r => {
+    const c = r.NumeroCapo || "â€”";
+    if (!alarmMap[c]) alarmMap[c] = { Capo: c, Gruppo: r.GruppoIntervallo, Count: 0, UltimoEsito: r.RisultatoVisita };
+    alarmMap[c].Count++;
+  });
+  const topAllarmi = Object.values(alarmMap).sort((a,b) => b.Count - a.Count).slice(0, 10);
+  const tbAllarmi = document.getElementById("top-allarmi-table");
+  if (tbAllarmi) {
+    tbAllarmi.innerHTML = topAllarmi.map((r, i) => 
+      <tr>
+        <td style="font-weight:700;color:var(--grey-text)"></td>
+        <td style="font-weight:700"></td>
+        <td></td>
+        <td><span class="pill pill-dn"> allarmi</span></td>
+        <td style="font-size:11px;color:#DC2626"></td>
+      </tr>
+    ).join("");
+  }
+
+  // 3. TOP 10 Residuo Mangime
+  const topResiduo = [...alimentareRows].sort((a,b) => (b.Residuo_kg||0) - (a.Residuo_kg||0)).slice(0, 10);
+  const tbResiduo = document.getElementById("top-residuo-table");
+  if (tbResiduo) {
+    tbResiduo.innerHTML = topResiduo.map((r, i) => 
+      <tr>
+        <td style="font-weight:700;color:var(--grey-text)"></td>
+        <td style="font-weight:700"></td>
+        <td></td>
+        <td></td>
+        <td><span class="pill "> kg (%)</span></td>
+      </tr>
+    ).join("");
+  }
+
+  // 4. TOP 10 Intervalli PiÃ¹ Lunghi (>12h)
+  const topIntervalli = [...ddiRows].sort((a,b) => (b.IntervalloOre||0) - (a.IntervalloOre||0)).slice(0, 10);
+  const tbIntervalli = document.getElementById("top-intervalli-table");
+  if (tbIntervalli) {
+    tbIntervalli.innerHTML = topIntervalli.map((r, i) => 
+      <tr>
+        <td style="font-weight:700;color:var(--grey-text)"></td>
+        <td style="font-weight:700"></td>
+        <td></td>
+        <td><span class="pill "> ore</span></td>
+        <td> kg</td>
+      </tr>
+    ).join("");
+  }
+
+  // Render Tables
+  document.getElementById("robot-visite-table").innerHTML = ddiRows.slice(0, 100).map(r => 
+    <tr class="">
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  ).join("");
+
+  document.getElementById("robot-alimentare-table").innerHTML = alimentareRows.map(r => 
+    <tr class="">
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>%</td>
+      <td></td>
+    </tr>
+  ).join("");
+}
+
+document.getElementById("hdr-date").textContent  = "Agg. " + AGGIORNATO;
+  document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO;
+}
+
+function renderSanita() {
+  initDateMultiselect("san-date-ms", "san", DATA_INGESTIONE, "renderSanita");
+  const dates = selectedDates.san;
+  const latestSelected = dates.slice().sort((a,b)=>dateSortKey(b).localeCompare(dateSortKey(a)))[0];
+  const NO_DATA_GROUPS = ["1","2","3","4","5"];
+  buildGrpFilter("san-grp-filters","san", DATA_INGESTIONE.filter(r=>!NO_DATA_GROUPS.includes(String(r.CreGR))), "renderSanita");
+  const rows = DATA_INGESTIONE.filter(r=>dates.includes(r.Date) && !NO_DATA_GROUPS.includes(String(r.CreGR)) && (activeGrp.san==="ALL"||String(r.CreGR)===activeGrp.san));
+  const rowsHaveRealData = rows.some(r => n(r.Ingestione_SS_capo) > 0);
+  let rankingRows = rows;
+  if (!rowsHaveRealData) {
+    const fallbackDate = allDatesCache.san.find(d => { const dayRows=DATA_INGESTIONE.filter(r=>r.Date===d && !NO_DATA_GROUPS.includes(String(r.CreGR)) && (activeGrp.san==="ALL"||String(r.CreGR)===activeGrp.san)); return dayRows.some(r=>n(r.Ingestione_SS_capo)>0); });
+    if (fallbackDate) rankingRows = DATA_INGESTIONE.filter(r=>r.Date===fallbackDate && !NO_DATA_GROUPS.includes(String(r.CreGR)) && (activeGrp.san==="ALL"||String(r.CreGR)===activeGrp.san));
+  }
+  const perDayStats = dates.map(d => {
+    const dayRows=rows.filter(r=>r.Date===d); if(!dayRows.length) return null;
+    const dayCapiSum=dayRows.reduce((s,r)=>s+n(r.Numero_Capi),0);
+    const ssValid=dayRows.filter(r=>n(r.Ingestione_SS_capo)>0); const daySSAvg=ssValid.length?ssValid.reduce((s,r)=>s+n(r.Ingestione_SS_capo),0)/ssValid.length:null;
+    const m7Valid=dayRows.filter(r=>n(r.Media_SS_7d)>0); const dayM7Avg=m7Valid.length?m7Valid.reduce((s,r)=>s+n(r.Media_SS_7d),0)/m7Valid.length:null;
+    const dayPSSum=dayRows.reduce((s,r)=>s+n(r.Peso_Secco),0);
+    return { capi:dayCapiSum, ss:daySSAvg, m7:dayM7Avg, ps:dayPSSum };
+  }).filter(Boolean);
+  const avgOf=(key)=>{ const vals=perDayStats.map(d=>d[key]).filter(v=>v!==null); return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0; };
+  const totalCapi=avgOf("capi"); const avgSS=avgOf("ss"); const avgM7=avgOf("m7"); const totalPS=avgOf("ps");
+  const avgVar=avgM7?((avgSS-avgM7)/avgM7)*100:0;
+  const varCls=avgVar>5?"green":avgVar<-5?"red":avgVar<-2?"amber":"";
+  const dateLabel=dates.length===1?dates[0]:`${dates.length} date`;
+  document.getElementById("san-scorecards").innerHTML=`
+    <div class="sc"><div class="sc-lbl"># Animali Attivi</div><div class="sc-val">${N0(totalCapi)}</div><div class="sc-sub">${dateLabel}</div></div>
+    <div class="sc ${varCls}"><div class="sc-lbl">Ingestione SS/capo</div><div class="sc-val">${N1(avgSS)}<small> kg</small></div><div class="sc-sub">Var: ${PCT(avgVar)}</div></div>
+    <div class="sc"><div class="sc-lbl">Media SS 7gg</div><div class="sc-val">${N1(avgM7)}<small> kg</small></div><div class="sc-sub">Rolling 7 giorni</div></div>
+    <div class="sc"><div class="sc-lbl">Peso Secco Totale</div><div class="sc-val">${N0(totalPS)}<small> kg</small></div><div class="sc-sub">Somma gruppi</div></div>`;
+  const grpRankAgg={};
+  rankingRows.forEach(r=>{ const g=r.CreGR; if(!grpRankAgg[g]) grpRankAgg[g]={ss:[],tq:[],capi:[]}; grpRankAgg[g].ss.push(n(r.Ingestione_SS_capo)); grpRankAgg[g].tq.push(n(r.Ingestione_TQ_capo)); grpRankAgg[g].capi.push(n(r.Numero_Capi)); });
+  const rankList=Object.entries(grpRankAgg).map(([g,v])=>(({g, ss:v.ss.reduce((a,b)=>a+b,0)/v.ss.length, tq:v.tq.reduce((a,b)=>a+b,0)/v.tq.length, capi:Math.round(v.capi.reduce((a,b)=>a+b,0)/v.capi.length)}))).sort((a,b)=>b.ss-a.ss);
+  const maxSS=Math.max(...rankList.map(r=>r.ss),1); const maxTQ=Math.max(...rankList.map(r=>r.tq),1);
+  document.getElementById("san-ranking-content").innerHTML=rankList.map(r=>`<div class="san-rank-item"><div class="san-rank-hdr"><span class="san-rank-grp">Gr.${r.g}</span><span class="san-rank-capi">${r.capi} capi</span></div><div class="san-rank-row"><span class="san-rank-lbl">SS</span><div class="san-rank-track"><div class="san-rank-fill ss" style="width:${Math.max(6,r.ss/maxSS*100)}%"></div></div><span class="san-rank-num">${N1(r.ss)} kg</span></div><div class="san-rank-row"><span class="san-rank-lbl">TQ</span><div class="san-rank-track"><div class="san-rank-fill tq" style="width:${Math.max(6,r.tq/maxTQ*100)}%"></div></div><span class="san-rank-num">${N1(r.tq)} kg</span></div></div>`).join("");
+  const rankingTitleEl=document.getElementById("san-ranking-title");
+  if (!rowsHaveRealData && rankingRows.length && rankingRows[0].Date) { rankingTitleEl.innerHTML=`SS vs TQ · Ranking per Gruppo <span style="color:var(--grey-text);font-weight:500;text-transform:none;letter-spacing:0">— dati al ${rankingRows[0].Date}</span>`; }
+  else { rankingTitleEl.textContent="SS vs TQ · Ranking per Gruppo"; }
+  const allDates=allDatesCache.san; const dateIdx=allDates.indexOf(latestSelected);
+  function ssGroupFilter(r){ return activeGrp.san==="ALL"||String(r.CreGR)===activeGrp.san; }
+  function ssValueForRows(rowsForBucket){ const valid=rowsForBucket.filter(r=>n(r.Ingestione_SS_capo)>0); return valid.length?valid.reduce((s,r)=>s+n(r.Ingestione_SS_capo),0)/valid.length:null; }
+  const ssLineLabel=activeGrp.san==="ALL"?"Media tutti i gruppi":"Gr."+activeGrp.san;
+  const ssLineColor=activeGrp.san==="ALL"?"#0284C7":BLUE_COLORS[0];
+  let ssLabels, ssData, ssTitleSuffix;
+  if (ssPeriod==="15g") {
+    const last15=allDates.slice(dateIdx,dateIdx+15).reverse();
+    ssLabels=last15.map(fmtLabel); ssData=last15.map(d=>ssValueForRows(DATA_INGESTIONE.filter(r=>r.Date===d&&ssGroupFilter(r)))); ssTitleSuffix="Ultimi 15 giorni";
+  } else if (ssPeriod==="month") {
+    const byMonth={};
+    DATA_INGESTIONE.filter(ssGroupFilter).forEach(r=>{ const key=dateSortKey(r.Date).slice(0,7); if(!byMonth[key]) byMonth[key]=[]; byMonth[key].push(r); });
+    const monthKeys=Object.keys(byMonth).sort().slice(-12);
+    const MONTH_IT=["Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"];
+    ssLabels=monthKeys.map(k=>{ const [y,m]=k.split("-"); return MONTH_IT[+m-1]+" "+y.slice(2); }); ssData=monthKeys.map(k=>ssValueForRows(byMonth[k])); ssTitleSuffix="Andamento Mensile";
+  } else {
+    const byYear={};
+    DATA_INGESTIONE.filter(ssGroupFilter).forEach(r=>{ const key=dateSortKey(r.Date).slice(0,4); if(!byYear[key]) byYear[key]=[]; byYear[key].push(r); });
+    const yearKeys=Object.keys(byYear).sort(); ssLabels=yearKeys; ssData=yearKeys.map(k=>ssValueForRows(byYear[k])); ssTitleSuffix="Andamento Annuale";
+  }
+  lineChart("chartSS", ssLabels, [{ label:ssLineLabel, data:ssData, borderColor:ssLineColor, backgroundColor:ssLineColor+"20", borderWidth:activeGrp.san==="ALL"?2.5:2, pointRadius:3, tension:.3, fill:false }], "SS/capo [kg]");
+  document.getElementById("chartSS-title").textContent="Ingestione Sostanza Secca per Capo · "+ssTitleSuffix;
+  // ── Summary fila promedio del período
+const sanDKeysSorted = dates.map(d=>dateSortKey(d)).sort();
+const sanDesde = dates.find(d=>dateSortKey(d)===sanDKeysSorted[0]);
+const sanHasta = dates.find(d=>dateSortKey(d)===sanDKeysSorted[sanDKeysSorted.length-1]);
+const sanDataCell = sanDesde !== sanHasta ? `${sanDesde} - ${sanHasta}` : sanDesde;
+const sanGrpsSel = activeGrp.san === "ALL"
+  ? [...new Set(rows.map(r=>String(r.CreGR)))].sort((a,b)=>+a-+b)
+  : [activeGrp.san];
+const sanGrpCell = sanGrpsSel.length <= 4
+  ? sanGrpsSel.map(g=>"Gr."+g).join(", ")
+  : `Tutti i gruppi (${sanGrpsSel.length})`;
+const sanTipiList = [...new Set(rows.map(r=>r.Tipo_Gruppo||tipoGruppo(r.CreGR)))].join(", ");
+const sanAvgCapi = rows.length ? Math.round(rows.reduce((s,r)=>s+n(r.Numero_Capi),0)/rows.length) : 0;
+const sanSSValid = rows.filter(r=>n(r.Ingestione_SS_capo)>0);
+const sanAvgSS = sanSSValid.length ? sanSSValid.reduce((s,r)=>s+n(r.Ingestione_SS_capo),0)/sanSSValid.length : 0;
+const sanM7Valid = rows.filter(r=>n(r.Media_SS_7d)>0);
+const sanAvgM7SS = sanM7Valid.length ? sanM7Valid.reduce((s,r)=>s+n(r.Media_SS_7d),0)/sanM7Valid.length : 0;
+const sanTQValid = rows.filter(r=>n(r.Ingestione_TQ_capo)>0);
+const sanAvgTQ = sanTQValid.length ? sanTQValid.reduce((s,r)=>s+n(r.Ingestione_TQ_capo),0)/sanTQValid.length : 0;
+const sanM7TQValid = rows.filter(r=>n(r.Media_TQ_7d)>0);
+const sanAvgM7TQ = sanM7TQValid.length ? sanM7TQValid.reduce((s,r)=>s+n(r.Media_TQ_7d),0)/sanM7TQValid.length : 0;
+const sanVarSS = sanAvgM7SS ? ((sanAvgSS-sanAvgM7SS)/sanAvgM7SS*100) : null;
+const sanVarTQ = sanAvgM7TQ ? ((sanAvgTQ-sanAvgM7TQ)/sanAvgM7TQ*100) : null;
+const sanPillAvg = (v) => { if(v===null) return "—"; const col=v>5?"#16A34A":v<-5?"#DC2626":v<-2?"#D97706":"#64748B"; return `<span class="pill" style="background:${col}20;color:${col};font-weight:700">${PCT(v)}</span>`; };
+document.getElementById("san-summary").innerHTML = `<tr style="background:var(--blue-bg)">
+  <td style="font-weight:700;color:var(--blue-dark)">${sanGrpCell}</td>
+  <td style="white-space:nowrap">${sanDataCell}</td>
+  <td>${sanTipiList}</td>
+  <td>${N0(sanAvgCapi)} avg</td>
+  <td>${N1(sanAvgSS)}</td>
+  <td>${N1(sanAvgM7SS)}</td>
+  <td>${sanPillAvg(sanVarSS)}</td>
+  <td>${N1(sanAvgTQ)}</td>
+  <td>${N1(sanAvgM7TQ)}</td>
+  <td>${sanPillAvg(sanVarTQ)}</td>
+</tr>`;
+document.getElementById("san-table").innerHTML=rows.sort((a,b)=>dateSortKey(b.Date).localeCompare(dateSortKey(a.Date))||(+a.CreGR-+b.CreGR)).map(r=>{ const varSS=varPct(r.Ingestione_SS_capo,r.Media_SS_7d); const varTQ=varPct(r.Ingestione_TQ_capo,r.Media_TQ_7d); return `<tr${rowCls(varSS)}><td>${r.CreGR}</td><td>${r.Date}</td>${cellTipo(r.Tipo_Gruppo)}<td>${N0(r.Numero_Capi)}</td><td>${N1(r.Ingestione_SS_capo)}</td><td>${N1(r.Media_SS_7d)}</td><td>${pillVar(varSS)}</td><td>${N1(r.Ingestione_TQ_capo)}</td><td>${N1(r.Media_TQ_7d)}</td><td>${pillVar(varTQ)}</td></tr>`; }).join("");
+  const grpVarAgg={};
+  rankingRows.forEach(r=>{ const g=r.CreGR; if(!grpVarAgg[g]) grpVarAgg[g]=[]; const vp=varPct(r.Ingestione_SS_capo,r.Media_SS_7d); if(vp!==null) grpVarAgg[g].push(vp); });
+  const varSorted=Object.entries(grpVarAgg).filter(([g,vals])=>vals.length>0).map(([g,vals])=>(({CreGR:g,Var_SS_pct:vals.reduce((a,b)=>a+b,0)/vals.length}))).sort((a,b)=>b.Var_SS_pct-a.Var_SS_pct);
+  const maxAbsVar=Math.max(...varSorted.map(r=>Math.abs(n(r.Var_SS_pct))),1);
+  document.getElementById("var-bars-content").innerHTML=varSorted.map(r=>{ const v=n(r.Var_SS_pct); const w=Math.min(Math.abs(v)/maxAbsVar*100,100); const col=v>5?"#16A34A":v<-5?"#DC2626":v<-2?"#D97706":"#64748B"; return `<div class="var-bar-row"><div class="var-bar-lbl">Gr.${r.CreGR}</div><div class="var-bar-track"><div class="var-bar-fill" style="width:${w}%;background:${col}"></div></div><div class="var-bar-pct" style="color:${col}">${PCT(v)}</div></div>`; }).join("");
+}
+
+// ══ SILOS ═════════════════════════════════════════════════════════════
+let activeSilo = "ALL";
+let SILOS_LIST = [];
+
+function buildSiloFilter() {
+  if (!SILOS_LIST.length) SILOS_LIST = [...new Set(DATA_SILOS.map(r=>r.Silo))];
+  const bar = document.getElementById("silos-filters");
+  bar.innerHTML = ["ALL",...SILOS_LIST].map(s =>
+    `<button class="fchip${activeSilo===s?" active":""}" onclick="setSilo('${s}')">${s==="ALL"?"Tutti":s}</button>`
+  ).join("");
+}
+function setSilo(s){ activeSilo = s; buildSiloFilter(); renderSilos(); }
+
+function pillDelta(v){
+  if (v===null||v===undefined||v===""||isNaN(+v)) return `<span class="pill pill-fl">n/d</span>`;
+  const x = +v;
+  if (x >  10) return `<span class="pill pill-am">${PCT(x)}</span>`;
+  if (x < -10) return `<span class="pill pill-dn">${PCT(x)}</span>`;
+  return `<span class="pill pill-fl">${PCT(x)}</span>`;
+}
+function cellAutonomia(v){
+  if (v===null||v===undefined||isNaN(+v)) return `<td>n/d</td>`;
+  const x = +v;
+  if (x < 3) return `<td style="color:#DC2626;font-weight:800">${N1(x)}</td>`;
+  if (x < 5) return `<td style="color:#D97706;font-weight:700">${N1(x)}</td>`;
+  return `<td style="font-weight:600">${N1(x)}</td>`;
+}
+
+function renderSilos() {
+  initDateMultiselect("silos-date-ms", "silos", DATA_SILOS, "renderSilos");
+  buildSiloFilter();
+  const dates = selectedDates.silos;
+  const allDates = allDatesCache.silos;
+  const latestSelected = dates.slice().sort((a,b)=>dateSortKey(b).localeCompare(dateSortKey(a)))[0];
+  const dateIdx = allDates.indexOf(latestSelected);
+
+  const rows = DATA_SILOS.filter(r => dates.includes(r.Date) && (activeSilo==="ALL"||r.Silo===activeSilo));
+  const snap = DATA_SILOS.filter(r => r.Date===latestSelected && (activeSilo==="ALL"||r.Silo===activeSilo));
+
+  // ── Scorecards
+  const autoVals = snap.map(r=>r.Autonomia_gg).filter(v=>v!==null&&!isNaN(+v)).map(Number);
+  const avgAuto = autoVals.length ? autoVals.reduce((a,b)=>a+b,0)/autoVals.length : null;
+  const nAlertAuto = snap.filter(r=>r.Alert_Autonomia).length;
+  const nAlertDist = snap.filter(r=>r.Alert_Distribuito).length;
+  document.getElementById("silos-scorecards").innerHTML = `
+    <div class="sc"><div class="sc-lbl">Silos monitorati</div><div class="sc-val">${snap.length}</div><div class="sc-sub">${latestSelected}</div></div>
+    <div class="sc"><div class="sc-lbl">Autonomia media</div><div class="sc-val">${avgAuto!==null?N1(avgAuto):"n/d"}<small> gg</small></div><div class="sc-sub">Media 3gg consumo</div></div>
+    <div class="sc ${nAlertAuto?"red":"green"}"><div class="sc-lbl">Alert autonomia</div><div class="sc-val">${nAlertAuto}</div><div class="sc-sub">Silos sotto 3 giorni</div></div>
+    <div class="sc ${nAlertDist?"amber":"green"}"><div class="sc-lbl">Alert distribuito</div><div class="sc-val">${nAlertDist}</div><div class="sc-sub">|Δ| oltre il 10%</div></div>`;
+
+  // ── Tabla
+  // ── Summary fila promedio del período
+const siloDKeysSorted = dates.slice().sort((a,b)=>dateSortKey(a).localeCompare(dateSortKey(b)));
+const siloDesde = siloDKeysSorted[0];
+const siloHasta = siloDKeysSorted[siloDKeysSorted.length-1];
+const siloDataCell = siloDesde !== siloHasta ? `${siloDesde} - ${siloHasta}` : siloDesde;
+const siloGrpCell = activeSilo === "ALL" ? `Tutti (${SILOS_LIST.length} silos)` : activeSilo;
+const siloStockValid = rows.filter(r=>r.Stock_qt!==null&&r.Stock_qt>0);
+const siloAvgStock = siloStockValid.length ? siloStockValid.reduce((s,r)=>s+n(r.Stock_qt),0)/siloStockValid.length : 0;
+const siloRiempValid = rows.filter(r=>r.Riempimento_pct!==null);
+const siloAvgRiemp = siloRiempValid.length ? siloRiempValid.reduce((s,r)=>s+n(r.Riempimento_pct),0)/siloRiempValid.length : 0;
+const siloDistValid = rows.filter(r=>r.Distribuito_kg!==null&&r.Distribuito_kg>0);
+const siloAvgDist = siloDistValid.length ? siloDistValid.reduce((s,r)=>s+n(r.Distribuito_kg),0)/siloDistValid.length : 0;
+const siloDeltaValid = rows.filter(r=>r.Delta_pct!==null&&!isNaN(+r.Delta_pct));
+const siloAvgDelta = siloDeltaValid.length ? siloDeltaValid.reduce((s,r)=>s+n(r.Delta_pct),0)/siloDeltaValid.length : null;
+const siloM3Valid = rows.filter(r=>r.Media_3gg_kg!==null&&r.Media_3gg_kg>0);
+const siloAvgM3 = siloM3Valid.length ? siloM3Valid.reduce((s,r)=>s+n(r.Media_3gg_kg),0)/siloM3Valid.length : 0;
+const siloAutoValid = rows.filter(r=>r.Autonomia_gg!==null&&!isNaN(+r.Autonomia_gg));
+const siloAvgAutoVal = siloAutoValid.length ? siloAutoValid.reduce((s,r)=>s+n(r.Autonomia_gg),0)/siloAutoValid.length : null;
+const siloSumDelta = siloAvgDelta!==null ? pillDelta(siloAvgDelta) : "<span class='pill pill-fl'>n/d</span>";
+const siloSumAuto = siloAvgAutoVal!==null
+  ? (siloAvgAutoVal<3?`<td style="color:#DC2626;font-weight:800">${N1(siloAvgAutoVal)} avg</td>`
+    :siloAvgAutoVal<5?`<td style="color:#D97706;font-weight:700">${N1(siloAvgAutoVal)} avg</td>`
+    :`<td style="font-weight:600">${N1(siloAvgAutoVal)} avg</td>`)
+  : "<td>n/d</td>";
+document.getElementById("silos-summary").innerHTML = `<tr style="background:var(--blue-bg)">
+  <td style="font-weight:700;color:var(--blue-dark)">${siloGrpCell}</td>
+  <td style="white-space:nowrap">${siloDataCell}</td>
+  <td>—</td><td>—</td><td>—</td>
+  <td>${N1(siloAvgStock)} avg</td>
+  <td>${N0(siloAvgRiemp)}% avg</td>
+  <td>${N0(siloAvgDist)} avg</td>
+  <td>${siloSumDelta}</td>
+  <td>${N0(siloAvgM3)} avg</td>
+  ${siloSumAuto}
+</tr>`;
+document.getElementById("silos-table").innerHTML = rows
+    .sort((a,b)=>dateSortKey(b.Date).localeCompare(dateSortKey(a.Date)) || SILOS_LIST.indexOf(a.Silo)-SILOS_LIST.indexOf(b.Silo))
+    .map(r=>{
+      const cls = r.Alert_Autonomia ? " class='row-alert'" : (r.Alert_Distribuito ? " class='row-warn'" : "");
+      return `<tr${cls}><td>${r.Silo}</td><td style="white-space:nowrap">${r.Date}</td><td>${r.Stalla}</td><td>${r.Contenuto}</td><td>${r.Destinazione}</td><td>${N1(r.Stock_qt)}</td><td>${N0(r.Riempimento_pct)}%</td><td>${r.Distribuito_kg!==null?N0(r.Distribuito_kg):"n/d"}</td><td>${pillDelta(r.Delta_pct)}</td><td>${r.Media_3gg_kg!==null?N0(r.Media_3gg_kg):"n/d"}</td>${cellAutonomia(r.Autonomia_gg)}</tr>`;
+    }).join("");
+
+  
+  const last15 = allDates.slice(dateIdx, dateIdx+15).reverse();
+  const dayRows = d => DATA_SILOS.filter(r=>r.Date===d && (activeSilo==="ALL"||r.Silo===activeSilo));
+  const lblSuffix = activeSilo==="ALL" ? "Totale silos" : activeSilo;
+
+  const stockData = last15.map(d=>{ const dr=dayRows(d); return dr.length ? dr.reduce((s,r)=>s+Math.max(0,n(r.Stock_qt)),0) : null; });
+  const distData  = last15.map(d=>{ const dr=dayRows(d); return dr.length ? dr.reduce((s,r)=>s+Math.max(0,n(r.Distribuito_kg)),0) : null; });
+
+  document.getElementById("chartSilosStock-title").textContent = `Evolutivo Stock (qt) · ${lblSuffix} · ultimi 15 giorni`;
+  document.getElementById("chartSilosDist-title").textContent  = `Evolutivo Distribuito (kg) · ${lblSuffix} · ultimi 15 giorni`;
+  lineChart("chartSilosStock", last15.map(fmtLabel), [
+    { label:"Stock (qt)", data:stockData, borderColor:"#0284C7", backgroundColor:"#0284C720", borderWidth:2, pointRadius:3, tension:.3, fill:false }
+  ], "quintali");
+  const distDatasets = [
+    { label:"Distribuito (kg)", data:distData, borderColor:"#FBA94C", backgroundColor:"#FBA94C20", borderWidth:2, pointRadius:3, tension:.3, fill:false }
+  ];
+  if (activeSilo!=="ALL") {
+    distDatasets.push({ label:"Media 3gg (kg)", data:last15.map(d=>{ const dr=dayRows(d); return dr.length && dr[0].Media_3gg_kg!==null ? +dr[0].Media_3gg_kg : null; }), borderColor:"#0284C7", backgroundColor:"#0284C720", borderWidth:2, pointRadius:2, tension:.3, fill:false, borderDash:[5,4] });
+  }
+  lineChart("chartSilosDist", last15.map(fmtLabel), distDatasets, "kg");
+
+  
+  const barsRows = snap.slice().sort((a,b)=>{
+    const av=a.Autonomia_gg===null?1e9:+a.Autonomia_gg;
+    const bv=b.Autonomia_gg===null?1e9:+b.Autonomia_gg;
+    return av-bv;
+  });
+  document.getElementById("silos-auto-title").textContent = `Giorni residui per silo · ${latestSelected}`;
+  const maxA = Math.max(...barsRows.map(r=>r.Autonomia_gg===null?0:+r.Autonomia_gg), 1);
+  document.getElementById("silos-autonomia-bars").innerHTML = barsRows.map(r=>{
+    const v = r.Autonomia_gg===null?null:+r.Autonomia_gg;
+    const w = v===null?4:Math.min(Math.max(v/maxA*100,6),100);
+    const col = v===null?"#94A3B8":v<3?"#DC2626":v<5?"#D97706":"#16A34A";
+    return `<div class="var-bar-row"><div class="var-bar-lbl" style="width:96px;text-align:left">${r.Silo}</div><div class="var-bar-track"><div class="var-bar-fill" style="width:${w}%;background:${col}"></div></div><div class="var-bar-pct" style="width:56px;color:${col}">${v===null?"n/d":N1(v)+" gg"}</div></div>`;
+  }).join("");
+  renderSilosIcons(snap, latestSelected);
+}
+function renderSilosIcons(snap, dateLabel) {
+  const grid = document.getElementById("silos-icons-grid");
+  if (!grid) return;
+  const sorted = snap.slice().sort((a,b)=>{
+    const av = a.Autonomia_gg===null?1e9:+a.Autonomia_gg;
+    const bv = b.Autonomia_gg===null?1e9:+b.Autonomia_gg;
+    return av-bv;
+  });
+  grid.innerHTML = sorted.map(r => {
+    const v = r.Autonomia_gg===null?null:+r.Autonomia_gg;
+    const riemp = Math.max(0,Math.min(100,+r.Riempimento_pct||0));
+    const col = v===null?"#94A3B8":v<3?"#DC2626":v<5?"#D97706":"#16A34A";
+    const stroke = col;
+    const strokeDash = r.Distribuito_kg===null?"4 2":"none";
+    const isActive = activeSilo===r.Silo;
+    const bodyH = 64;
+    const fillH = Math.max(0, Math.min(bodyH, riemp/100 * bodyH));
+    const fillY = 92 - fillH;
+    const fillOpacity = v===null?0.15:0.25;
+    const safeId = r.Silo.replace(/[^a-zA-Z0-9]/g,"_");
+    return `<div class="silo-icon-card${isActive?" silo-active":""}" onclick="setSilo('${r.Silo}')">\n      <svg width="60" height="84" viewBox="0 0 72 104" style="display:block">\n        <defs><clipPath id="clip-${safeId}"><path d="M10 28 L36 8 L62 28 L62 92 Q62 96 58 96 L14 96 Q10 96 10 92 Z"/></clipPath></defs>\n        <path d="M10 28 L36 8 L62 28 L62 92 Q62 96 58 96 L14 96 Q10 96 10 92 Z" fill="var(--grey-bg)" stroke="${col}" stroke-width="${v===null?1.5:2}" stroke-dasharray="${strokeDash}"/>\n        <rect x="10" y="${fillY}" width="52" height="${fillH + 4}" clip-path="url(#clip-${safeId})" fill="${col}" opacity="${fillOpacity}"/>\n        ${fillH > 2 ? `<rect x="10" y="${fillY}" width="52" height="3" clip-path="url(#clip-${safeId})" fill="${col}" opacity="0.55"/>` : ""}\n        <text x="36" y="${Math.max(50, fillY - 6 < 42 ? 50 : fillY - 6)}" text-anchor="middle" font-size="10" font-weight="700" fill="${col}" font-family="Roboto,sans-serif">${Math.round(riemp)}%</text>\n        <line x1="36" y1="96" x2="36" y2="102" stroke="${col}" stroke-width="2.5"/>\n        <circle cx="36" cy="102" r="2.5" fill="${col}"/>\n      </svg>\n      <div class="silo-icon-name">${r.Silo}</div>\n      <div class="silo-icon-auto" style="color:${col}">${v===null?"n/d":N1(v)+" gg"}</div>\n      <div style="font-size:9px;color:var(--grey-text);font-weight:500">180 qt</div>\n    </div>`;
+  }).join("");
+}
+
+// ══ ROBOT DI MUNGITURA ═════════════════════════════════════════════════
+function renderStackedChart(canvasId, labels, datasets) {
+  killChart(canvasId);
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
   CHS[canvasId] = new Chart(ctx, {
     type: 'bar',
     data: { labels: labels, datasets: datasets },
@@ -1391,4 +1973,4 @@ document.getElementById("home-date").textContent = "Aggiornato al " + AGGIORNATO
 </html>
 <!-- deploy:1789774502416 -->
 
-<!-- deploy:1789790759209 -->
+<!-- deploy:1789790814005 -->
