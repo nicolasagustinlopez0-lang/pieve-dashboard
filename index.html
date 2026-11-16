@@ -405,11 +405,13 @@ tr.row-alert td{background:#FCE8E6;}
 }
 
 @media print {
-  .app-header, .nav-bottom, .sidebar, .float-jump-btn, .date-filter-bar, .filter-row, .exec-actions-group, .period-toggle { display: none !important; }
-  body { background: #FFFFFF !important; padding-bottom: 0 !important; font-size: 11px !important; }
+  .app-header, .nav-bottom, .sidebar, .desktop-sidebar, .float-jump-btn, .date-filter-bar, .filter-row, .exec-actions-group, .period-toggle { display: none !important; }
+  body { background: #FFFFFF !important; padding-bottom: 0 !important; font-size: 11px !important; color: #1E293B !important; }
   .section { display: block !important; padding: 10px 0 !important; page-break-after: always; }
-  .card, .sc, .exec-status-banner { box-shadow: none !important; border: 1px solid #CBD5E1 !important; }
-  .chart-wrap { height: 220px !important; }
+  .card, .sc, .exec-status-banner { box-shadow: none !important; border: 1px solid #CBD5E1 !important; page-break-inside: avoid; }
+  .chart-card { page-break-inside: avoid; }
+  .chart-wrap { height: 260px !important; position: relative !important; width: 100% !important; }
+  canvas { max-width: 100% !important; height: auto !important; }
 }
 </style>
 </head>
@@ -472,10 +474,6 @@ tr.row-alert td{background:#FCE8E6;}
           <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v6H6z"/></svg>
           <span>PDF</span>
         </button>
-        <button type="button" class="hdr-btn-action wa-btn" onclick="shareWhatsApp()" title="Condividi WhatsApp">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.3 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-          <span>WhatsApp</span>
-        </button>
       </div>
     <div class="hdr-title">Pro Farmer  Dashboard</div>
     <div class="hdr-date" id="hdr-date"></div>
@@ -484,25 +482,6 @@ tr.row-alert td{background:#FCE8E6;}
 
 
 <div class="section active" id="sec-home">
-  <div class="exec-status-banner">
-    <div class="exec-status-main">
-      <div class="exec-status-dot"></div>
-      <div>
-        <div class="exec-status-title">🟢 Stato Sistema: Operativo</div>
-        <div class="exec-status-sub">Sincronizzazione in tempo reale · Tutti i moduli attivi</div>
-      </div>
-    </div>
-    <div class="exec-actions-group">
-      <button type="button" class="exec-act-btn" onclick="exportPDF()" title="Esporta PDF">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v6H6z"/></svg>
-        <span>Esporta PDF</span>
-      </button>
-      <button type="button" class="exec-act-btn wa-act" onclick="shareWhatsApp()" title="Condividi su WhatsApp">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.3 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-        <span>WhatsApp</span>
-      </button>
-    </div>
-  </div>
   <div class="home-hero">
     <div class="home-kicker">Monitoraggio in tempo reale</div>
     <div class="home-logo-chip">
@@ -1849,32 +1828,52 @@ document.getElementById("san-table").innerHTML=rows.sort((a,b)=>dateSortKey(b.Da
   document.getElementById("var-bars-content").innerHTML=varSorted.map(r=>{ const v=n(r.Var_SS_pct); const w=Math.min(Math.abs(v)/maxAbsVar*100,100); const col=v>5?"#16A34A":v<-5?"#DC2626":v<-2?"#D97706":"#64748B"; return `<div class="var-bar-row"><div class="var-bar-lbl">Gr.${r.CreGR}</div><div class="var-bar-track"><div class="var-bar-fill" style="width:${w}%;background:${col}"></div></div><div class="var-bar-pct" style="color:${col}">${PCT(v)}</div></div>`; }).join("");
 }
 
-/* â•â• EXECUTIVE HANDLERS & PRESETS â•â• */
+/* EXECUTIVE HANDLERS & PRINT PREPARATION */
+function prepareForPDFPrint() {
+  const activeSec = document.querySelector('.section.active')?.id?.replace('sec-', '') || 'home';
+  const sections = document.querySelectorAll('.section');
+  
+  // Show all sections so Chart.js has container dimensions
+  sections.forEach(s => s.style.display = 'block');
+  
+  if (typeof renderProduzione === 'function') renderProduzione();
+  if (typeof renderSanita === 'function') renderSanita();
+  if (typeof renderSilos === 'function') renderSilos();
+  if (typeof renderRobot === 'function') renderRobot();
+  
+  Object.values(CHS).forEach(chart => {
+    if (chart && typeof chart.resize === 'function') {
+      chart.resize();
+      chart.update('none');
+    }
+  });
+
+  setTimeout(() => {
+    window.print();
+    sections.forEach(s => s.style.display = '');
+    if (typeof goTo === 'function') goTo(activeSec);
+  }, 150);
+}
+
 function exportPDF() {
-  window.print();
+  prepareForPDFPrint();
 }
 
-function shareWhatsApp() {
-  const dateStr = typeof AGGIORNATO !== 'undefined' ? AGGIORNATO : 'Oggi';
-  let prodMsg = '';
-  
-  if (typeof DATA_INGESTIONE !== 'undefined' && DATA_INGESTIONE.length) {
-    const latestRows = DATA_INGESTIONE.filter(r => r.Date === dateStr || r.Es_Ultimo_Giorno === 'Si');
-    const totalCapi = latestRows.reduce((s,r) => s + (Number(r.Numero_Capi)||0), 0);
-    const avgSS = latestRows.length ? (latestRows.reduce((s,r) => s + (Number(r.Ingestione_SS_capo)||0), 0) / latestRows.length).toFixed(1) : '-';
-    prodMsg = `ðŸ„ *Capi Attivi:* ${Math.round(totalCapi)}\nðŸŒ¾ *Ingestione SS:* ${avgSS} kg/capo\n`;
-  }
-  
-  let silosMsg = '';
-  if (typeof DATA_SILOS !== 'undefined' && DATA_SILOS.length) {
-    const alerts = DATA_SILOS.filter(r => r.Alert_Autonomia || r.Autonomia_gg < 8).length;
-    silosMsg = `ðŸ“Š *Silos in Alert:* ${alerts}\n`;
-  }
+window.addEventListener('beforeprint', () => {
+  document.querySelectorAll('.section').forEach(s => s.style.display = 'block');
+  Object.values(CHS).forEach(chart => {
+    if (chart && typeof chart.resize === 'function') {
+      chart.resize();
+      chart.update('none');
+    }
+  });
+});
 
-  const text = `ðŸ“Š *Pro Farmer - Report Aziendale*\nðŸ“… *Data:* ${dateStr}\n\n${prodMsg}${silosMsg}\nðŸ”— *Dashboard Completa:* https://profarmer.farm`;
-  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-  window.open(url, '_blank');
-}
+window.addEventListener('afterprint', () => {
+  const activeSec = document.querySelector('.section.active')?.id?.replace('sec-', '') || 'home';
+  document.querySelectorAll('.section').forEach(s => s.style.display = '');
+  if (typeof goTo === 'function') goTo(activeSec);
+});
 
 function dmsSelectPreset(key, containerId, renderFn, count) {
   if (!allDatesCache[key] || !allDatesCache[key].length) return;
@@ -1899,4 +1898,4 @@ function dmsSelectPreset(key, containerId, renderFn, count) {
 </body>
 </html>
 
-<!-- deploy:1794872620885 -->
+<!-- deploy:1794873207600 -->
