@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -300,6 +300,113 @@ tr.row-alert td{background:#FCE8E6;}
 .silo-icon-card.silo-active{background:var(--blue-bg);}
 .silo-icon-name{font-size:9px;font-weight:700;color:var(--black2);text-align:center;line-height:1.2;}
 .silo-icon-auto{font-size:10px;font-weight:700;text-align:center;}
+
+ 
+.hdr-actions { display: flex; align-items: center; gap: 6px; }
+.hdr-btn-action {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.hdr-btn-action:hover { background: rgba(255,255,255,0.22); }
+.hdr-btn-action.wa-btn { background: #16A34A; border-color: #15803D; }
+.hdr-btn-action.wa-btn:hover { background: #15803D; }
+
+.exec-status-banner {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--grey-line);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.exec-status-main { display: flex; align-items: center; gap: 10px; }
+.exec-status-dot {
+  width: 10px; height: 10px; border-radius: 50%; background: #16A34A;
+  box-shadow: 0 0 0 3px rgba(22,163,74,0.2);
+  animation: pulse-green 2s infinite;
+}
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(22,163,74,0); }
+  100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); }
+}
+.exec-status-title { font-size: 12px; font-weight: 700; color: var(--black); }
+.exec-status-sub { font-size: 10px; color: var(--grey-text); }
+
+.exec-actions-group { display: flex; align-items: center; gap: 8px; }
+.exec-act-btn {
+  background: var(--blue-bg);
+  color: var(--blue-dark);
+  border: 1px solid var(--blue-lite);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: background 0.15s, transform 0.08s;
+}
+.exec-act-btn:hover { background: var(--blue); color: #fff; }
+.exec-act-btn:active { transform: scale(0.97); }
+.exec-act-btn.wa-act { background: var(--green-bg); color: #15803D; border-color: #86EFAC; }
+.exec-act-btn.wa-act:hover { background: #16A34A; color: #fff; }
+
+.quick-presets-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--grey-line);
+  overflow-x: auto;
+}
+.quick-preset-lbl { font-size: 10px; font-weight: 700; color: var(--grey-text); white-space: nowrap; }
+.quick-preset-btn {
+  background: var(--grey-bg);
+  color: var(--black2);
+  border: 1px solid var(--grey-line);
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: all 0.12s ease;
+}
+.quick-preset-btn:hover, .quick-preset-btn.active {
+  background: var(--blue);
+  color: #FFFFFF;
+  border-color: var(--blue);
+}
+
+@media print {
+  .app-header, .nav-bottom, .sidebar, .float-jump-btn, .date-filter-bar, .filter-row, .exec-actions-group, .period-toggle { display: none !important; }
+  body { background: #FFFFFF !important; padding-bottom: 0 !important; font-size: 11px !important; }
+  .section { display: block !important; padding: 10px 0 !important; page-break-after: always; }
+  .card, .sc, .exec-status-banner { box-shadow: none !important; border: 1px solid #CBD5E1 !important; }
+  .chart-wrap { height: 220px !important; }
+}
 </style>
 </head>
 <body>
@@ -351,7 +458,17 @@ tr.row-alert td{background:#FCE8E6;}
   <div class="hdr-logo-chip">
     <img src="https://profarmer.it/wp-content/uploads/2023/02/cropped-cropped-cropped-Pro-Farmer-Logo-01-1-scaled-170x57.png" alt="Pro Farmer" style="height:18px;display:block;">
   </div>
-  <div class="hdr-right">
+  <div class="hdr-right" style="display:flex;align-items:center;gap:10px;">
+      <div class="hdr-actions">
+        <button type="button" class="hdr-btn-action" onclick="exportPDF()" title="Stampa / PDF">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v6H6z"/></svg>
+          <span>PDF</span>
+        </button>
+        <button type="button" class="hdr-btn-action wa-btn" onclick="shareWhatsApp()" title="Condividi WhatsApp">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.3 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+          <span>WhatsApp</span>
+        </button>
+      </div>
     <div class="hdr-title">Pro Farmer  Dashboard</div>
     <div class="hdr-date" id="hdr-date"></div>
   </div>
@@ -1704,8 +1821,55 @@ document.getElementById("san-table").innerHTML=rows.sort((a,b)=>dateSortKey(b.Da
   const maxAbsVar=Math.max(...varSorted.map(r=>Math.abs(n(r.Var_SS_pct))),1);
   document.getElementById("var-bars-content").innerHTML=varSorted.map(r=>{ const v=n(r.Var_SS_pct); const w=Math.min(Math.abs(v)/maxAbsVar*100,100); const col=v>5?"#16A34A":v<-5?"#DC2626":v<-2?"#D97706":"#64748B"; return `<div class="var-bar-row"><div class="var-bar-lbl">Gr.${r.CreGR}</div><div class="var-bar-track"><div class="var-bar-fill" style="width:${w}%;background:${col}"></div></div><div class="var-bar-pct" style="color:${col}">${PCT(v)}</div></div>`; }).join("");
 }
+
+/* â•â• EXECUTIVE HANDLERS & PRESETS â•â• */
+function exportPDF() {
+  window.print();
+}
+
+function shareWhatsApp() {
+  const dateStr = typeof AGGIORNATO !== 'undefined' ? AGGIORNATO : 'Oggi';
+  let prodMsg = '';
+  
+  if (typeof DATA_INGESTIONE !== 'undefined' && DATA_INGESTIONE.length) {
+    const latestRows = DATA_INGESTIONE.filter(r => r.Date === dateStr || r.Es_Ultimo_Giorno === 'Si');
+    const totalCapi = latestRows.reduce((s,r) => s + (Number(r.Numero_Capi)||0), 0);
+    const avgSS = latestRows.length ? (latestRows.reduce((s,r) => s + (Number(r.Ingestione_SS_capo)||0), 0) / latestRows.length).toFixed(1) : '-';
+    prodMsg = `ðŸ„ *Capi Attivi:* ${Math.round(totalCapi)}\nðŸŒ¾ *Ingestione SS:* ${avgSS} kg/capo\n`;
+  }
+  
+  let silosMsg = '';
+  if (typeof DATA_SILOS !== 'undefined' && DATA_SILOS.length) {
+    const alerts = DATA_SILOS.filter(r => r.Alert_Autonomia || r.Autonomia_gg < 8).length;
+    silosMsg = `ðŸ“Š *Silos in Alert:* ${alerts}\n`;
+  }
+
+  const text = `ðŸ“Š *Pro Farmer - Report Aziendale*\nðŸ“… *Data:* ${dateStr}\n\n${prodMsg}${silosMsg}\nðŸ”— *Dashboard Completa:* https://profarmer.farm`;
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+function dmsSelectPreset(key, containerId, renderFn, count) {
+  if (!allDatesCache[key] || !allDatesCache[key].length) return;
+  if (count === 'ALL') {
+    selectedDates[key] = [...allDatesCache[key]];
+  } else {
+    selectedDates[key] = allDatesCache[key].slice(0, Number(count));
+  }
+  
+  const panel = document.getElementById(containerId + '-panel');
+  if (panel) {
+    const cbs = panel.querySelectorAll('input[type="checkbox"]');
+    cbs.forEach(cb => {
+      cb.checked = selectedDates[key].includes(cb.value);
+    });
+  }
+  
+  dmsUpdateSummary(key, containerId);
+  window[renderFn]();
+}
 </script>
 </body>
 </html>
 
-<!-- deploy:1794857850687 -->
+<!-- deploy:1794866359987 -->
