@@ -279,7 +279,8 @@ tr.row-alert td{background:#FCE8E6;}
   .sidebar-footer{display:flex;align-items:center;gap:8px;padding:14px 20px 0;margin-top:12px;border-top:0.5px solid rgba(255,255,255,0.1);}
   .sidebar-footer span{font-size:9px;color:#94A3B8;font-weight:500;}
   .sidebar-footer img{height:13px;opacity:.9;}
-  .app-header{display:none;}
+  .app-header{display:flex;padding:10px 24px;border-bottom:1px solid #334155;}
+  .hdr-logo-chip{display:none;}
   .nav-bottom{display:none;}
   .float-jump-btn{bottom:28px;}
   .section{padding:32px 48px;max-width:1500px;margin:0 auto;}
@@ -461,6 +462,10 @@ tr.row-alert td{background:#FCE8E6;}
   <div class="hdr-logo-chip">
     <img src="https://profarmer.it/wp-content/uploads/2023/02/cropped-cropped-cropped-Pro-Farmer-Logo-01-1-scaled-170x57.png" alt="Pro Farmer" style="height:18px;display:block;">
   </div>
+  <div class="hdr-sys-status" style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#38BDF8;background:rgba(56,189,248,0.12);padding:4px 10px;border-radius:12px;border:1px solid rgba(56,189,248,0.25);">
+    <span style="width:7px;height:7px;border-radius:50%;background:#16A34A;display:inline-block;"></span>
+    <span>Stato Sistema: Operativo</span>
+  </div>
   <div class="hdr-right" style="display:flex;align-items:center;gap:10px;">
       <div class="hdr-actions">
         <button type="button" class="hdr-btn-action" onclick="exportPDF()" title="Stampa / PDF">
@@ -479,6 +484,25 @@ tr.row-alert td{background:#FCE8E6;}
 
 
 <div class="section active" id="sec-home">
+  <div class="exec-status-banner">
+    <div class="exec-status-main">
+      <div class="exec-status-dot"></div>
+      <div>
+        <div class="exec-status-title">🟢 Stato Sistema: Operativo</div>
+        <div class="exec-status-sub">Sincronizzazione in tempo reale · Tutti i moduli attivi</div>
+      </div>
+    </div>
+    <div class="exec-actions-group">
+      <button type="button" class="exec-act-btn" onclick="exportPDF()" title="Esporta PDF">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v6H6z"/></svg>
+        <span>Esporta PDF</span>
+      </button>
+      <button type="button" class="exec-act-btn wa-act" onclick="shareWhatsApp()" title="Condividi su WhatsApp">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.3 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        <span>WhatsApp</span>
+      </button>
+    </div>
+  </div>
   <div class="home-hero">
     <div class="home-kicker">Monitoraggio in tempo reale</div>
     <div class="home-logo-chip">
@@ -1875,4 +1899,4 @@ function dmsSelectPreset(key, containerId, renderFn, count) {
 </body>
 </html>
 
-<!-- deploy:1794872215488 -->
+<!-- deploy:1794872620885 -->
